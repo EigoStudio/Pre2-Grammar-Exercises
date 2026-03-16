@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>15章 仮定法①</title>
+    <link href="https://fonts.googleapis.com/css2?family=Andika:wght@400&family=Kosugi+Maru&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --emerald: #2ecc71;
+            --dark-blue: #2c3e50;
+            --soft-blue: #3498db;
+            --bg-gray: #f4f7f6;
+            --font-main: 'Andika', 'Kosugi Maru', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-main);
+            /* 合字（リガチャー）を無効化し、fとlなどが合体しないように設定 */
+            font-variant-ligatures: none;
+            -webkit-font-variant-ligatures: none;
+            background-color: var(--bg-gray);
+            color: var(--dark-blue);
+            display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0;
+        }
+
+        .container {
+            background: white; width: 95%; max-width: 900px; padding: 40px;
+            border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center; border-top: 8px solid var(--emerald);
+            box-sizing: border-box;
+        }
+
+        h1 { font-family: var(--font-main); font-size: 2rem; margin-bottom: 30px; }
+
+        .question-box {
+            font-size: 1.5rem; margin-bottom: 30px; padding: 30px;
+            background: #fafafa; border-radius: 12px; border: 1px solid #ddd;
+            line-height: 1.8;
+        }
+
+        .grid-choices {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .list-choices {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 500px;
+            margin: 0 auto 20px auto;
+        }
+
+        .choice-btn {
+            display: block; width: 100%; padding: 18px;
+            border: 2px solid #ddd; border-radius: 10px;
+            background: white; cursor: pointer; font-size: 1.2rem;
+            font-family: var(--font-main); text-align: center; transition: 0.2s;
+        }
+        .choice-btn:hover { border-color: var(--emerald); background: #f0fff4; }
+
+        .btn-ox {
+            width: 150px; height: 80px; border-radius: 40px; border: 3px solid #ddd;
+            font-size: 2rem; cursor: pointer; background: white; margin: 0 15px;
+        }
+
+        .next-btn {
+            background: var(--dark-blue); color: white; border: none;
+            padding: 18px 50px; border-radius: 40px; cursor: pointer; margin-top: 20px;
+            font-family: var(--font-main); font-size: 1.2rem;
+        }
+
+        .highlight { color: var(--emerald); font-weight: bold; text-decoration: underline; }
+        .blank-space { display: inline-block; width: 180px; border-bottom: 2px solid #333; vertical-align: bottom; margin: 0 10px; }
+
+        #print-area { display: none; }
+
+        @media print {
+            body * { visibility: hidden; }
+            #print-area, #print-area * { visibility: visible; }
+            #print-area {
+                display: block !important; position: absolute; left: 0; top: 0;
+                width: 100%; color: black; background: white;
+                font-variant-ligatures: none;
+            }
+            .print-page { page-break-after: always; padding: 30px 50px; }
+            .print-title { font-size: 18pt; font-weight: normal; margin-bottom: 30px; text-align: center; }
+            .print-q { margin-bottom: 10px; font-size: 12.5pt; line-height: 2.3; }
+            .print-choices { margin-top: 8px; margin-bottom: 15px; padding-left: 20px; }
+            .choice-item { display: inline-block; margin-right: 35px; }
+            .ws-blank { display: inline-block; width: 150px; border-bottom: 1px solid black; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>15章 仮定法①</h1>
+
+    <div class="container" id="quiz-container">
+        <div id="progress">Question 1 / 20</div>
+        <div id="questionText" class="question-box"></div>
+        <div id="uiArea"></div>
+        <button id="nextBtn" class="next-btn" onclick="nextQuestion()" style="display:none;">Next →</button>
+    </div>
+
+    <div id="print-area">
+        <div class="print-page">
+            <div class="print-title">15章 仮定法①</div>
+            <div id="ws-part1"></div>
+        </div>
+        <div class="print-page">
+            <div class="print-title">15章 仮定法①</div>
+            <div id="ws-part2"></div>
+        </div>
+    </div>
+
+<script>
+const rawQuestions = [
+    { q: "If I knew the answer, I <span class='blank-space'></span> tell it to you.", choices: ["can", "will", "would", "am going to"], ans: "would", type: "4choice" },
+    { q: "If he <span class='blank-space'></span> that I was coming, he would not have gone out.", choices: ["knows", "knew", "has known", "had known"], ans: "had known", type: "4choice" },
+    { q: "This bag is so nice. I wish I <span class='blank-space'></span> the money to buy it.", choices: ["have", "had", "will have", "would have"], ans: "had", type: "4choice" },
+    { q: "Greg is behaving <span class='blank-space'></span> he were a 5-year-old kid.", choices: ["if", "as if", "if only", "when"], ans: "as if", type: "4choice" },
+    { q: "I would not help her if I <span class='blank-space'></span> you.", choices: ["be", "is", "am", "were"], ans: "were", type: "4choice" },
+    { q: "<span class='blank-space'></span> I could play the piano.", choices: ["If", "If only", "As if", "When"], ans: "If only", type: "4choice" },
+    { q: "If it <span class='blank-space'></span> sunny today, we could go to the park.", choices: ["is", "was", "were", "has been"], ans: "were", type: "4choice" },
+    { q: "I wish I <span class='blank-space'></span> more for the test yesterday.", choices: ["study", "studied", "have studied", "had studied"], ans: "had studied", type: "4choice" },
+    { q: "He talks as if he <span class='blank-space'></span> a movie star.", choices: ["is", "was", "be", "were"], ans: "were", type: "4choice" },
+    { q: "If I <span class='blank-space'></span> enough time then, I would have visited you.", choices: ["have", "had", "have had", "had had"], ans: "had had", type: "4choice" },
+    { q: "If I am a bird, I would fly to you.", ans: false, choices: ["were に変える", "was に変える", "had been に変える"], correct: "were に変える", final: "If I <span class='highlight'>were</span> a bird, I would fly to you.", type: "ox" },
+    { q: "I wish I could speak English better.", ans: true, final: "I wish I could speak English better.", type: "ox" },
+    { q: "She acts as if she knows the secret.", ans: false, choices: ["knew に変える", "had known に変える", "knowing に変える"], correct: "knew に変える", final: "She acts as if she <span class='highlight'>knew</span> the secret.", type: "ox" },
+    { q: "If it had rained yesterday, the game would be canceled.", ans: false, choices: ["would have been に変える", "will be に変える", "is に変える"], correct: "would have been に変える", final: "If it had rained yesterday, the game <span class='highlight'>would have been</span> canceled.", type: "ox" },
+    { q: "If only I have more time now!", ans: false, choices: ["had に変える", "have had に変える", "would have に変える"], correct: "had に変える", final: "If only I <span class='highlight'>had</span> more time now!", type: "ox" },
+    { q: "If I were you, I would buy that dress.", ans: true, final: "If I were you, I would buy that dress.", type: "ox" },
+    { q: "I wish I had not said such a thing to him last night.", ans: true, final: "I wish I had not said such a thing to him last night.", type: "ox" },
+    { q: "He treats me as if I am a child.", ans: false, choices: ["were に変える", "was に変える", "be に変える"], correct: "were に変える", final: "He treats me as if I <span class='highlight'>were</span> a child.", type: "ox" },
+    { q: "If I had known his number, I would have called him.", ans: true, final: "If I had known his number, I would have called him.", type: "ox" },
+    { q: "If I have wings, I would fly to the island.", ans: false, choices: ["had に変える", "have had に変える", "were having に変える"], correct: "had に変える", final: "If I <span class='highlight'>had</span> wings, I would fly to the island.", type: "ox" }
+];
+
+let currentIdx = 0;
+
+function shuffle(array) {
+    return array.sort(() => Math.random() - 0.5);
+}
+
+function initWorksheet() {
+    const p1 = document.getElementById('ws-part1');
+    const p2 = document.getElementById('ws-part2');
+    rawQuestions.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'print-q';
+        if (item.type === "4choice") {
+            const cleanQ = item.q.replace("<span class='blank-space'></span>", " ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) ");
+            div.innerHTML = `${index + 1}. ${cleanQ}`;
+            const cDiv = document.createElement('div');
+            cDiv.className = 'print-choices';
+            cDiv.innerHTML = `
+                <span class="choice-item">(1) ${item.choices[0]}</span>
+                <span class="choice-item">(2) ${item.choices[1]}</span>
+                <span class="choice-item">(3) ${item.choices[2]}</span>
+                <span class="choice-item">(4) ${item.choices[3]}</span>
+            `;
+            p1.appendChild(div);
+            p1.appendChild(cDiv);
+        } else {
+            div.innerHTML = `${index + 1}. ${item.q} <br> &nbsp;&nbsp; [ &nbsp; Correct &nbsp; / &nbsp; Incorrect &nbsp; ] &rarr; Fix: <span class='ws-blank'></span>`;
+            p2.appendChild(div);
+        }
+    });
+}
+
+function loadQuestion() {
+    const q = rawQuestions[currentIdx];
+    document.getElementById('progress').textContent = `Question ${currentIdx + 1} / 20`;
+    document.getElementById('questionText').innerHTML = q.q;
+    const ui = document.getElementById('uiArea');
+    ui.innerHTML = "";
+    document.getElementById('nextBtn').style.display = 'none';
+
+    if (q.type === "4choice") {
+        ui.className = "grid-choices";
+        const shuffled = shuffle([...q.choices]);
+        shuffled.forEach(c => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.textContent = c;
+            btn.onclick = () => {
+                if (c === q.ans) showSuccess(q.q.replace("<span class='blank-space'></span>", `<span class="highlight">${c}</span>`));
+                else alert("Try again!");
+            };
+            ui.appendChild(btn);
+        });
+    } else {
+        ui.className = "";
+        ui.innerHTML = `
+            <button class="btn-ox" onclick="handleOX(true)">◯</button>
+            <button class="btn-ox" onclick="handleOX(false)">×</button>
+        `;
+    }
+}
+
+function handleOX(isO) {
+    const q = rawQuestions[currentIdx];
+    if (isO === q.ans) {
+        if (q.ans) showSuccess(q.final);
+        else showCorrectionChoices();
+    } else alert("Look closely at the tense!");
+}
+
+function showCorrectionChoices() {
+    const q = rawQuestions[currentIdx];
+    const ui = document.getElementById('uiArea');
+    ui.innerHTML = `<p style="margin-bottom:15px; font-weight:bold;">How to fix it?</p>`;
+    const listWrap = document.createElement('div');
+    listWrap.className = "list-choices";
+    const shuffled = shuffle([...q.choices]);
+    shuffled.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.textContent = c;
+        btn.onclick = () => {
+            if (c === q.correct) showSuccess(q.final);
+            else alert("Try again!");
+        };
+        listWrap.appendChild(btn);
+    });
+    ui.appendChild(listWrap);
+}
+
+function showSuccess(msg) {
+    confetti({ particleCount: 100, spread: 70, colors: ['#2ecc71', '#2c3e50', '#3498db'] });
+    document.getElementById('questionText').innerHTML = `✅ ${msg}`;
+    document.getElementById('uiArea').innerHTML = "";
+    document.getElementById('nextBtn').style.display = 'inline-block';
+}
+
+function nextQuestion() {
+    currentIdx++;
+    if (currentIdx < rawQuestions.length) loadQuestion();
+    else document.getElementById('quiz-container').innerHTML = "<h2 style='color:var(--emerald)'>All Clear! 🏆</h2><p>Excellent work!</p>";
+}
+
+window.onload = () => {
+    initWorksheet();
+    loadQuestion();
+};
+</script>
+</body>
+</html>
