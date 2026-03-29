@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>16章 仮定法 ②</title>
+    <link href="https://fonts.googleapis.com/css2?family=Andika&family=Kosugi+Maru&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root { --purple: #9b59b6; --dark: #2c3e50; --font-main: 'Andika', 'Kosugi Maru', sans-serif; }
+        body { font-family: var(--font-main); background: #f0f2f5; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        
+        .container { background: white; width: 95%; max-width: 850px; padding: 35px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-top: 8px solid var(--purple); text-align: center; }
+        .question-box { font-size: 1.6rem; margin-bottom: 25px; padding: 30px; background: #fdfaff; border-radius: 10px; border: 1px solid #eee; line-height: 1.7; }
+        .translation { font-size: 1.1rem; color: #666; margin-bottom: 12px; display: block; font-weight: bold; }
+        .blank { border-bottom: 3px solid var(--purple); color: var(--purple); font-weight: bold; padding: 0 15px; }
+        
+        .btn { padding: 18px; border: 2px solid #ddd; border-radius: 12px; background: white; cursor: pointer; font-size: 1.3rem; font-family: inherit; margin: 8px; transition: 0.2s; }
+        .btn:hover { border-color: var(--purple); background: #f5edfa; }
+        
+        .btn-judge { width: 110px; height: 110px; border-radius: 50%; border: 4px solid #eee; font-size: 2.2rem; cursor: pointer; background: white; margin: 15px; }
+        
+        .answer-area { min-height: 70px; border-bottom: 3px dashed var(--purple); margin: 20px 0; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; background: #fffdf9; padding: 10px; border-radius: 10px; }
+        .word-btn { padding: 12px 22px; border: 2px solid var(--purple); border-radius: 30px; background: white; cursor: pointer; font-size: 1.3rem; font-weight: bold; margin: 5px; }
+        .word-btn.used { opacity: 0.2; pointer-events: none; }
+        
+        .pop-sentence { font-size: 1.8rem; color: var(--purple); font-weight: bold; margin-top: 20px; animation: bubblePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); line-height: 1.4; }
+        @keyframes bubblePop { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+        .next-btn { display: none; background: var(--dark); color: white; border: none; padding: 20px 80px; border-radius: 40px; font-size: 1.5rem; cursor: pointer; margin: 30px auto; }
+
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; width: 100%; color: black; background: white; }
+            .print-title { font-size: 20pt; text-align: center; margin-bottom: 30px; padding-bottom: 10px; border-bottom: 2px solid black; }
+            .print-page { page-break-after: always; padding: 30px 50px; }
+            .print-q { margin-bottom: 18px; font-size: 12pt; line-height: 1.7; }
+            .print-ja { font-size: 10pt; color: #333; margin-bottom: 3px; font-weight: bold; }
+            .print-sub { font-size: 11pt; margin-top: 6px; }
+            .choice-item { display: inline-block; margin-right: 45px; } 
+            .fix-line { border-bottom: 1px solid black; width: 280px; display: inline-block; height: 1.2em; }
+        }
+        .print-only { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container no-print">
+    <div id="quiz-ui">
+        <div id="progress" style="color:#888; font-size:1.1rem; margin-bottom: 10px;">Question 1 / 20</div>
+        <div id="questionText" class="question-box"></div>
+        <div id="interactionArea"></div>
+        <div id="correctionArea" style="display:none;">
+            <p style="font-weight:bold; color:var(--purple); font-size: 1.2rem; margin-bottom: 15px;">How to fix it? 正しい形を選ぼう！</p>
+            <div id="correctionChoices" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"></div>
+        </div>
+        <div id="feedback" style="margin:20px; font-weight:bold; color:var(--purple); font-size: 1.5rem;"></div>
+        <button id="nextBtn" class="next-btn" onclick="nextQuestion()">Next →</button>
+    </div>
+    <button onclick="window.print()" style="margin-top:40px; background:none; border:none; text-decoration:underline; color:#aaa; cursor:pointer; font-size: 1rem;">🖨️ ワークシートを印刷する</button>
+</div>
+
+<div id="print-area" class="print-only">
+    <div class="print-page">
+        <div class="print-title">16章 仮定法 ②</div>
+        <div id="ws-p1"></div>
+    </div>
+    <div class="print-page"><div id="ws-p2"></div></div>
+</div>
+
+<script>
+const quizData = [
+    { type: "choice", ja: "蒸気機関の発明がなかったら、産業革命は起こらなかっただろう。", q: "<span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> for the invention of the steam engine, the Industrial Revolution wouldn't have occurred.", choices: ["But", "Without", "If only", "As if"], ans: "But" },
+    { type: "choice", ja: "君の助けがなかったら、彼らは成功しなかっただろう。", q: "If it <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> for your support, they wouldn't have succeeded.", choices: ["had not been", "were not", "as it were", "wish"], ans: "had not been" },
+    { type: "ox", ja: "彼は、いわば歩く辞書だ。", q: "He is, as it was, a walking dictionary.", ans: false, fixChoices: ["as it were に変える", "if only に変える", "as if に変える"], fixAns: "as it were に変える" },
+    { type: "sort", ja: "空気がなければ、鳥は飛べないだろう。", words: ["If", "it", "were", "not", "for", "air", ",", "birds", "couldn't", "fly", "."], full: "If it were not for air, birds couldn't fly." },
+    { type: "choice", ja: "車がなければ、私たちは湖にたどり着けないだろう。", q: "If it were not for the car, we <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> the lake.", choices: ["couldn't reach", "cannot reach", "couldn't have reached", "reach"], ans: "couldn't reach" },
+    { type: "ox", ja: "彼の援助がなかったら、プロジェクトは始まらなかっただろう。", q: "If it had not been for his help, the project wouldn't have started.", ans: true },
+    { type: "choice", ja: "君の助けがあれば、彼はそれを終わらせられただろうに。", q: "<span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> your help, he could have finished it.", choices: ["With", "Without", "But for", "If only"], ans: "With" },
+    { type: "sort", ja: "彼は、いわば日本のエジソンだ。", words: ["He", "is", ",", "so", "to", "speak", ",", "the", "Edison", "of", "Japan", "."], full: "He is, so to speak, the Edison of Japan." },
+    { type: "choice", ja: "まるで幽霊を見たかのような顔だね。", q: "You look <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> you had seen a ghost.", choices: ["as if", "as it were", "but for", "wish"], ans: "as if" },
+    { type: "ox", ja: "もし水がなければ、私たちは生きられない。(今)", q: "If it had not been for water, we couldn't live.", ans: false, fixChoices: ["If it were not for にする", "If it was for にする", "I wish にする"], fixAns: "If it were not for にする" },
+    { type: "sort", ja: "太陽がなければ、地球上のものは何も育たないだろう。", words: ["Without", "the", "sun", ",", "nothing", "would", "grow", "."], full: "Without the sun, nothing would grow." },
+    { type: "choice", ja: "もっと時間があればいいのになぁ。", q: "I <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> I had more time.", choices: ["wish", "if only", "as if", "were"], ans: "wish" },
+    { type: "sort", ja: "音楽がなければ、人生は退屈だろう。", words: ["If", "it", "were", "not", "for", "music", ",", "life", "would", "be", "boring", "."], full: "If it were not for music, life would be boring." },
+    { type: "ox", ja: "いわば、彼は現代の侍だ。", q: "He is, as it were, a modern samurai.", ans: true },
+    { type: "sort", ja: "辞書がなければ、その本を読めなかっただろう。", words: ["Without", "a", "dictionary", ",", "I", "couldn't", "have", "read", "the", "book", "."], full: "Without a dictionary, I couldn't have read the book." },
+    { type: "choice", ja: "正直さがなかったら、彼女は愛さなかっただろう。", q: "If it had not been for his honesty, she <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> him.", choices: ["wouldn't have loved", "wouldn't love", "as if", "wish"], ans: "wouldn't have loved" },
+    { type: "sort", ja: "君の助言がなかったら、私は失敗していただろう。", words: ["But", "for", "your", "advice", ",", "I", "would", "have", "failed", "."], full: "But for your advice, I would have failed." },
+    { type: "ox", ja: "もし昨日雨でなければ、出かけたのに。", q: "If it were not for the rain yesterday, we would have gone out.", ans: false, fixChoices: ["If it had not been for にする", "I wish にする", "as if にする"], fixAns: "If it had not been for にする" },
+    { type: "choice", ja: "空気がなければ、私たちは生きていけない。", q: "<span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> air, we couldn't live.", choices: ["Without", "But", "If only", "With"], ans: "Without" },
+    { type: "sort", ja: "彼は、いわば私の命の恩人だ。", words: ["He", "is", ",", "as", "it", "were", ",", "my", "lifesaver", "."], full: "He is, as it were, my lifesaver." }
+];
+
+let currentIdx = 0, userSort = [];
+
+function loadQuestion() {
+    const data = quizData[currentIdx];
+    document.getElementById('progress').textContent = `Question ${currentIdx+1} / 20`;
+    document.getElementById('nextBtn').style.display = "none";
+    document.getElementById('feedback').textContent = "";
+    document.getElementById('correctionArea').style.display = "none";
+    const interaction = document.getElementById('interactionArea');
+    interaction.style.display = "block"; interaction.innerHTML = "";
+    userSort = [];
+
+    const qBox = document.getElementById('questionText');
+    qBox.innerHTML = `<span class="translation">${data.ja}</span>${data.q || ""}`;
+
+    if (data.type === "choice") {
+        [...data.choices].sort(() => Math.random() - 0.5).forEach(c => {
+            const b = document.createElement('button'); b.className = "btn"; b.textContent = c;
+            b.onclick = () => { if(c === data.ans) { document.getElementById('b-v').textContent = c; showWin(); } else alert("Try again!"); };
+            interaction.appendChild(b);
+        });
+    } else if (data.type === "ox") {
+        interaction.innerHTML = `<button class="btn-judge" style="color:#4caf50; border-color:#4caf50;" onclick="checkOX(true)">◯</button><button class="btn-judge" style="color:#ff1744; border-color:#ff1744;" onclick="checkOX(false)">×</button>`;
+    } else if (data.type === "sort") {
+        qBox.innerHTML = `<span class="translation">${data.ja}</span><div class="answer-area" id="az"></div>`;
+        const bank = document.createElement('div');
+        [...data.words].sort(() => Math.random() - 0.5).forEach(w => {
+            const b = document.createElement('button'); b.className = "word-btn"; b.textContent = w;
+            b.onclick = () => { b.classList.add('used'); userSort.push({text:w, btn:b}); renderSort(); };
+            bank.appendChild(b);
+        });
+        interaction.appendChild(bank);
+        const ck = document.createElement('button'); ck.className = "btn"; ck.style.background="var(--purple)"; ck.style.color="white"; ck.textContent = "Check Answer";
+        ck.onclick = () => { if(userSort.map(i=>i.text).join(" ").replace(/ ,/g,",").replace(/ \./g,".") === data.full) showWin(true); else alert("Check order!"); };
+        interaction.appendChild(ck);
+    }
+}
+
+function checkOX(val) {
+    const data = quizData[currentIdx];
+    if (val === data.ans) { if (data.ans) showWin(); else showFix(); }
+    else { if (val === true && !data.ans) showFix(); else alert("Look closely!"); }
+}
+
+function showFix() {
+    document.getElementById('interactionArea').style.display = 'none';
+    const area = document.getElementById('correctionArea'); area.style.display = 'block';
+    const grid = document.getElementById('correctionChoices'); grid.innerHTML = "";
+    // 修正の選択肢もシャッフルするように修正
+    [...quizData[currentIdx].fixChoices].sort(() => Math.random() - 0.5).forEach(c => {
+        const b = document.createElement('button'); b.className = "btn"; b.textContent = c;
+        b.onclick = () => { if(c === quizData[currentIdx].fixAns) showWin(); else alert("Try again!"); };
+        grid.appendChild(b);
+    });
+}
+
+function renderSort() {
+    const zone = document.getElementById('az'); zone.innerHTML = "";
+    userSort.forEach((item, idx) => {
+        const s = document.createElement('span'); s.className = "word-btn"; s.textContent = item.text;
+        s.onclick = () => { item.btn.classList.remove('used'); userSort.splice(idx,1); renderSort(); };
+        zone.appendChild(s);
+    });
+}
+
+function showWin(isSort = false) {
+    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+    const interaction = document.getElementById('interactionArea');
+    if(isSort) {
+        interaction.innerHTML = `<div class="pop-sentence">${quizData[currentIdx].full}</div>`;
+        const az = document.getElementById('az'); if(az) az.style.display = 'none';
+    } else interaction.style.display = 'none';
+    document.getElementById('correctionArea').style.display = 'none';
+    document.getElementById('feedback').textContent = "Excellent! 🏆";
+    document.getElementById('nextBtn').style.display = "block";
+}
+
+function nextQuestion() {
+    currentIdx++;
+    if (currentIdx < quizData.length) loadQuestion();
+    else {
+        // 全問終了後の画面表示
+        document.getElementById('quiz-ui').innerHTML = `
+            <div style="animation: bubblePop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+                <h1 style="font-size:4rem; margin-bottom:10px;">🏆</h1>
+                <h2 style="font-size:2.5rem; color:var(--purple); margin-bottom:20px;">Complete!</h2>
+                <p style="font-size:1.3rem; margin-bottom:30px;">20問すべてクリアしました！<br>仮定法 ②はバッチリですね！</p>
+                <button class="btn" onclick="location.reload()" style="background:var(--purple); color:white; border:none;">もう一度挑戦する</button>
+            </div>`;
+    }
+}
+
+window.onload = () => {
+    quizData.forEach((q, i) => {
+        const target = i < 10 ? document.getElementById('ws-p1') : document.getElementById('ws-p2');
+        const div = document.createElement('div'); div.className = 'print-q';
+        let line = q.q ? q.q.replace("<span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span>", "( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )") : "___________________________";
+        let sub = q.type==='ox' ? `<div class='print-sub'>[ Correct / Incorrect ] → Fix: <span class='fix-line'></span></div>` : 
+                  q.type==='sort' ? `<div class='print-sub'>語群: [ ${q.words.join(" / ")} ]</div>` : 
+                  `<div class='print-sub'><span class='choice-item'>(1) ${q.choices[0]}</span><span class='choice-item'>(2) ${q.choices[1]}</span><span class='choice-item'>(3) ${q.choices[2]}</span><span class='choice-item'>(4) ${q.choices[3]}</span></div>`;
+        div.innerHTML = `<div class='print-ja'>${i+1}. ${q.ja}</div><div>${line}</div>${sub}`;
+        target.appendChild(div);
+    });
+    loadQuestion();
+};
+</script>
+</body>
+</html>
