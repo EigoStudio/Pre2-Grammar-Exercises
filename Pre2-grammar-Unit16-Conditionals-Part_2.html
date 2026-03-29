@@ -9,7 +9,8 @@
         :root { --purple: #9b59b6; --dark: #2c3e50; --font-main: 'Andika', 'Kosugi Maru', sans-serif; }
         body { font-family: var(--font-main); background: #f0f2f5; display: flex; flex-direction: column; align-items: center; padding: 20px; }
         
-        .container { background: white; width: 95%; max-width: 850px; padding: 35px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-top: 8px solid var(--purple); text-align: center; }
+        /* ブラウザ版設定 */
+        .container { background: white; width: 95%; max-width: 900px; padding: 35px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-top: 8px solid var(--purple); text-align: center; }
         .question-box { font-size: 1.6rem; margin-bottom: 25px; padding: 30px; background: #fdfaff; border-radius: 10px; border: 1px solid #eee; line-height: 1.7; }
         .translation { font-size: 1.1rem; color: #666; margin-bottom: 12px; display: block; font-weight: bold; }
         .blank { border-bottom: 3px solid var(--purple); color: var(--purple); font-weight: bold; padding: 0 15px; }
@@ -28,15 +29,22 @@
 
         .next-btn { display: none; background: var(--dark); color: white; border: none; padding: 20px 80px; border-radius: 40px; font-size: 1.5rem; cursor: pointer; margin: 30px auto; }
 
+        /* 印刷用設定: A4 2枚 / 行間1.2倍 / タイトル統一 / 語群シャッフル */
         @media print {
             .no-print { display: none !important; }
             .print-only { display: block !important; width: 100%; color: black; background: white; }
-            .print-title { font-size: 20pt; text-align: center; margin-bottom: 30px; padding-bottom: 10px; border-bottom: 2px solid black; }
-            .print-page { page-break-after: always; padding: 30px 50px; }
-            .print-q { margin-bottom: 18px; font-size: 12pt; line-height: 1.7; }
+            .print-title { font-size: 16pt; text-align: center; margin-bottom: 15px; padding-bottom: 5px; border-bottom: 2px solid black; }
+            .print-page { 
+    page-break-after: always; 
+    padding-top: 5px;      /* 上の余白だけを 5px に */
+    padding-bottom: 5px;  /* 下は 30px */
+    padding-left: 0px;    /* 左は 50px */
+    padding-right: 0px;   /* 右は 50px */
+}
+            .print-q { margin-bottom: 15px; font-size: 11pt; line-height: 1.6; }
             .print-ja { font-size: 10pt; color: #333; margin-bottom: 3px; font-weight: bold; }
             .print-sub { font-size: 11pt; margin-top: 6px; }
-            .choice-item { display: inline-block; margin-right: 45px; } 
+            .choice-item { display: inline-block; margin-right: 40px; } 
             .fix-line { border-bottom: 1px solid black; width: 280px; display: inline-block; height: 1.2em; }
         }
         .print-only { display: none; }
@@ -45,17 +53,15 @@
 <body>
 
 <div class="container no-print">
-    <div id="quiz-ui">
-        <div id="progress" style="color:#888; font-size:1.1rem; margin-bottom: 10px;">Question 1 / 20</div>
-        <div id="questionText" class="question-box"></div>
-        <div id="interactionArea"></div>
-        <div id="correctionArea" style="display:none;">
-            <p style="font-weight:bold; color:var(--purple); font-size: 1.2rem; margin-bottom: 15px;">How to fix it? 正しい形を選ぼう！</p>
-            <div id="correctionChoices" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"></div>
-        </div>
-        <div id="feedback" style="margin:20px; font-weight:bold; color:var(--purple); font-size: 1.5rem;"></div>
-        <button id="nextBtn" class="next-btn" onclick="nextQuestion()">Next →</button>
+    <div id="progress" style="color:#888; font-size:1.1rem; margin-bottom: 10px;">Question 1 / 20</div>
+    <div id="questionText" class="question-box"></div>
+    <div id="interactionArea"></div>
+    <div id="correctionArea" style="display:none;">
+        <p style="font-weight:bold; color:var(--purple); font-size: 1.2rem; margin-bottom: 15px;">How to fix it? 正しい形を選ぼう！</p>
+        <div id="correctionChoices" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"></div>
     </div>
+    <div id="feedback" style="margin:20px; font-weight:bold; color:var(--purple); font-size: 1.5rem;"></div>
+    <button id="nextBtn" class="next-btn" onclick="nextQuestion()">Next →</button>
     <button onclick="window.print()" style="margin-top:40px; background:none; border:none; text-decoration:underline; color:#aaa; cursor:pointer; font-size: 1rem;">🖨️ ワークシートを印刷する</button>
 </div>
 
@@ -64,10 +70,22 @@
         <div class="print-title">16章 仮定法 ②</div>
         <div id="ws-p1"></div>
     </div>
-    <div class="print-page"><div id="ws-p2"></div></div>
+    <div class="print-page">
+        <div id="ws-p2"></div>
+    </div>
 </div>
 
 <script>
+// フィッシャー・イェーツのシャッフル関数
+function shuffleArray(array) {
+    let result = [...array];
+    for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
+}
+
 const quizData = [
     { type: "choice", ja: "蒸気機関の発明がなかったら、産業革命は起こらなかっただろう。", q: "<span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> for the invention of the steam engine, the Industrial Revolution wouldn't have occurred.", choices: ["But", "Without", "If only", "As if"], ans: "But" },
     { type: "choice", ja: "君の助けがなかったら、彼らは成功しなかっただろう。", q: "If it <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> for your support, they wouldn't have succeeded.", choices: ["had not been", "were not", "as it were", "wish"], ans: "had not been" },
@@ -107,7 +125,7 @@ function loadQuestion() {
     qBox.innerHTML = `<span class="translation">${data.ja}</span>${data.q || ""}`;
 
     if (data.type === "choice") {
-        [...data.choices].sort(() => Math.random() - 0.5).forEach(c => {
+        shuffleArray(data.choices).forEach(c => {
             const b = document.createElement('button'); b.className = "btn"; b.textContent = c;
             b.onclick = () => { if(c === data.ans) { document.getElementById('b-v').textContent = c; showWin(); } else alert("Try again!"); };
             interaction.appendChild(b);
@@ -117,7 +135,7 @@ function loadQuestion() {
     } else if (data.type === "sort") {
         qBox.innerHTML = `<span class="translation">${data.ja}</span><div class="answer-area" id="az"></div>`;
         const bank = document.createElement('div');
-        [...data.words].sort(() => Math.random() - 0.5).forEach(w => {
+        shuffleArray(data.words).forEach(w => {
             const b = document.createElement('button'); b.className = "word-btn"; b.textContent = w;
             b.onclick = () => { b.classList.add('used'); userSort.push({text:w, btn:b}); renderSort(); };
             bank.appendChild(b);
@@ -139,8 +157,7 @@ function showFix() {
     document.getElementById('interactionArea').style.display = 'none';
     const area = document.getElementById('correctionArea'); area.style.display = 'block';
     const grid = document.getElementById('correctionChoices'); grid.innerHTML = "";
-    // 修正の選択肢もシャッフルするように修正
-    [...quizData[currentIdx].fixChoices].sort(() => Math.random() - 0.5).forEach(c => {
+    shuffleArray(quizData[currentIdx].fixChoices).forEach(c => {
         const b = document.createElement('button'); b.className = "btn"; b.textContent = c;
         b.onclick = () => { if(c === quizData[currentIdx].fixAns) showWin(); else alert("Try again!"); };
         grid.appendChild(b);
@@ -171,16 +188,7 @@ function showWin(isSort = false) {
 function nextQuestion() {
     currentIdx++;
     if (currentIdx < quizData.length) loadQuestion();
-    else {
-        // 全問終了後の画面表示
-        document.getElementById('quiz-ui').innerHTML = `
-            <div style="animation: bubblePop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
-                <h1 style="font-size:4rem; margin-bottom:10px;">🏆</h1>
-                <h2 style="font-size:2.5rem; color:var(--purple); margin-bottom:20px;">Complete!</h2>
-                <p style="font-size:1.3rem; margin-bottom:30px;">20問すべてクリアしました！<br>仮定法 ②はバッチリですね！</p>
-                <button class="btn" onclick="location.reload()" style="background:var(--purple); color:white; border:none;">もう一度挑戦する</button>
-            </div>`;
-    }
+    else document.getElementById('quiz-ui').innerHTML = "<h1 style='font-size:4rem;'>🏆</h1><h2 style='font-size:2.5rem; color:var(--purple);'>Complete!</h2><p style='font-size:1.3rem;'>仮定法②を完璧にマスターしました！</p><button class='btn' onclick='location.reload()'>Restart</button>";
 }
 
 window.onload = () => {
@@ -188,9 +196,24 @@ window.onload = () => {
         const target = i < 10 ? document.getElementById('ws-p1') : document.getElementById('ws-p2');
         const div = document.createElement('div'); div.className = 'print-q';
         let line = q.q ? q.q.replace("<span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span>", "( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )") : "___________________________";
-        let sub = q.type==='ox' ? `<div class='print-sub'>[ Correct / Incorrect ] → Fix: <span class='fix-line'></span></div>` : 
-                  q.type==='sort' ? `<div class='print-sub'>語群: [ ${q.words.join(" / ")} ]</div>` : 
-                  `<div class='print-sub'><span class='choice-item'>(1) ${q.choices[0]}</span><span class='choice-item'>(2) ${q.choices[1]}</span><span class='choice-item'>(3) ${q.choices[2]}</span><span class='choice-item'>(4) ${q.choices[3]}</span></div>`;
+        
+        let sub = "";
+        if (q.type === 'ox') {
+            sub = `<div class='print-sub'>[ Correct / Incorrect ] → Fix: <span class='fix-line'></span></div>`;
+        } else if (q.type === 'sort') {
+            // ワークシート生成時にも語群を確実にシャッフル
+            const shuffledWords = shuffleArray(q.words);
+            sub = `<div class='print-sub'>語群: [ ${shuffledWords.join(" / ")} ]</div>`;
+        } else {
+            const shuffledChoices = shuffleArray(q.choices);
+            sub = `<div class='print-sub'>
+                <span class='choice-item'>(1) ${shuffledChoices[0]}</span>
+                <span class='choice-item'>(2) ${shuffledChoices[1]}</span>
+                <span class='choice-item'>(3) ${shuffledChoices[2]}</span>
+                <span class='choice-item'>(4) ${shuffledChoices[3]}</span>
+            </div>`;
+        }
+        
         div.innerHTML = `<div class='print-ja'>${i+1}. ${q.ja}</div><div>${line}</div>${sub}`;
         target.appendChild(div);
     });
