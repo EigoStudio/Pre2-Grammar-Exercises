@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>9章〜16章 まとめ 予想テスト</title>
+    <link href="https://fonts.googleapis.com/css2?family=Andika&family=Kosugi+Maru&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root { --purple: #9b59b6; --dark: #2c3e50; --font-main: 'Andika', 'Kosugi Maru', sans-serif; }
+        body { font-family: var(--font-main); background: #f0f2f5; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        
+        .container { background: white; width: 95%; max-width: 900px; padding: 35px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-top: 8px solid var(--purple); margin-bottom: 20px; }
+        
+        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; }
+        .tab-btn { padding: 12px 25px; border: none; background: #ddd; border-radius: 30px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: 0.3s; }
+        .tab-btn.active { background: var(--purple); color: white; }
+
+        /* 問題文は左寄せ */
+        .question-box { font-size: 1.25rem; margin-bottom: 25px; padding: 30px; background: #fdfaff; border-radius: 10px; border: 1px solid #eee; line-height: 1.7; text-align: left; }
+        
+        /* 空欄は一本の下線 */
+        .blank { border-bottom: 2px solid var(--purple); color: var(--purple); font-weight: bold; padding: 0 10px; min-width: 140px; display: inline-block; text-align: center; }
+        
+        .choices-area { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .btn { padding: 15px; border: 2px solid #ddd; border-radius: 12px; background: white; cursor: pointer; font-size: 1.1rem; transition: 0.2s; font-family: inherit; }
+        .btn:hover:not(:disabled) { border-color: var(--purple); background: #f5edfa; }
+        .btn:disabled { opacity: 0.6; cursor: default; }
+
+        .feedback-area { margin-top: 20px; padding: 20px; border-radius: 10px; display: none; text-align: left; animation: fadeIn 0.4s; }
+        .feedback-correct { background: #e8f5e9; color: #2e7d32; border-left: 5px solid #4caf50; }
+        .feedback-wrong { background: #ffebee; color: #c62828; border-left: 5px solid #f44336; }
+
+        .score-display { font-size: 2rem; color: var(--purple); font-weight: bold; text-align: center; margin: 20px 0; }
+        .advice-card { background: #fffde7; padding: 20px; border-radius: 10px; border: 1px solid #ffe082; line-height: 1.6; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 印刷用 */
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; width: 100%; color: black; background: white; }
+            .print-page { page-break-after: always; padding: 10px; }
+            .print-title { font-size: 18pt; text-align: center; border-bottom: 2px solid black; margin-bottom: 20px; padding-bottom: 10px; }
+            .print-q { margin-bottom: 20px; font-size: 11pt; line-height: 1.5; page-break-inside: avoid; }
+            .print-blank { display: inline-block; width: 60px; border-bottom: 1px solid black; vertical-align: bottom; }
+            .print-choices { margin-left: 25px; display: flex; gap: 30px; font-size: 10pt; line-height: 1.7;}
+        }
+        .print-only { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container no-print">
+    <div class="tabs">
+        <button id="tab1" class="tab-btn active" onclick="switchPart(1)">Part 1: 予想テスト</button>
+        <button id="tab2" class="tab-btn" onclick="switchPart(2)">Part 2: 期末総合演習</button>
+    </div>
+
+    <div id="quiz-ui">
+        <div id="progress" style="color:#888; font-size:1rem; margin-bottom: 10px; text-align: center;">Question 1 / 13</div>
+        <div id="questionText" class="question-box"></div>
+        <div id="choicesArea" class="choices-area"></div>
+        <div id="feedbackArea" class="feedback-area"></div>
+        <button id="nextBtn" class="btn" style="display:none; width: 100%; background: var(--dark); color: white; margin-top: 20px;" onclick="nextQuestion()">Next →</button>
+    </div>
+
+    <div id="result-ui" style="display:none;">
+        <h2 style="text-align: center;">Test Complete!</h2>
+        <div id="finalScore" class="score-display"></div>
+        <div id="adviceText" class="advice-card"></div>
+        <button class="btn" style="margin-top:20px; width:100%;" onclick="location.reload()">もう一度挑戦する</button>
+    </div>
+
+    <button onclick="window.print()" style="margin: 40px auto 0; display: block; background:none; border:none; text-decoration:underline; color:#aaa; cursor:pointer; font-size: 1rem;">🖨️ ワークシートを印刷する</button>
+</div>
+
+<div id="print-area" class="print-only">
+    <div class="print-page">
+        <div class="print-title">9章〜16章 まとめ 予想テスト</div>
+        <div style="text-align: right; margin-bottom: 15px;">氏名: __________________________</div>
+        <div id="ws-content"></div>
+    </div>
+</div>
+
+<script>
+const dataP1 = [
+    { q: "The baby fell asleep in his mother's arms, so she gently <span class='blank' id='b-v'>&nbsp;</span> him on the bed.", choices: ["lie", "lay", "lain", "laid"], ans: "laid", hint: "【他動詞】「〜を横たえる」は lay-laid-laid です。" },
+    { q: "Although the prices of crude oil <span class='blank' id='b-v'>&nbsp;</span> by about 20% last month, many analysts expect them to fall this month.", choices: ["raise", "raised", "rose", "risen"], ans: "rose", hint: "【自動詞】「上がる」は rise-rose-risen。過去形 rose を選びます。" },
+    { q: "Those who wanted to take the training program had to <span class='blank' id='b-v'>&nbsp;</span> the meeting, but Kyoko completely forgot about it.", choices: ["resemble", "discuss", "contact", "attend"], ans: "attend", hint: "【他動詞】attend は前置詞なしで目的語を取ります。" },
+    { q: "Brenda and her family canceled the trip to Miami because a tropical storm was <span class='blank' id='b-v'>&nbsp;</span> the city.", choices: ["approaching", "moving", "leading", "arriving"], ans: "approaching", hint: "【他動詞】approach も前置詞なしでOK。arriving なら at や in が必要。" },
+    { q: "Ms. Collins <span class='blank' id='b-v'>&nbsp;</span> for New York on business yesterday. She will be there till the 20th.", choices: ["leaves", "left", "has left", "had left"], ans: "left", hint: "yesterday があるので、単純過去の left を使います。" },
+    { q: "Lucy knew that Ron had been practicing the violin very hard, so when he won the contest, she thought he <span class='blank' id='b-v'>&nbsp;</span> the victory.", choices: ["deserves", "deserved", "would deserve", "has deserved"], ans: "deserved", hint: "【時制の一致】thought が過去なので、deserved も過去形に。" },
+    { q: "According to the police, 52 people were <span class='blank' id='b-v'>&nbsp;</span> traffic accidents in the city last year.", choices: ["died of", "died from", "killed in", "killed by"], ans: "killed in", hint: "事故で亡くなる受動態は be killed in (事故) です。" },
+    { q: "On hearing the teacher say \"You <span class='blank' id='b-v'>&nbsp;</span> start now,\" the students simultaneously turned over the test papers.", choices: ["could", "may", "would like", "might as well"], ans: "may", hint: "【許可】「〜してもよい」という改まった表現です。" },
+    { q: "A: I have some things to talk about with Mike, but I can't find him.<br>B: He <span class='blank' id='b-v'>&nbsp;</span> be studying in the classroom.", choices: ["will", "had better", "cannot", "might"], ans: "might", hint: "「かもしれない」という推量です。" },
+    { q: "A: Look at Ben. He has cream on his lips.<br>B: He <span class='blank' id='b-v'>&nbsp;</span> have eaten the cake while we were out.", choices: ["must", "should", "cannot", "ought to"], ans: "must", hint: "must have V-ed で「〜したに違いない」。" },
+    { q: "A: Ken, this train isn't going to Maple Square. We <span class='blank' id='b-v'>&nbsp;</span> trains at Oak Street.<br>B: Really? I have to tell Cindy we'll be late.", choices: ["may well change", "used to change", "would change", "should have changed"], ans: "should have changed", hint: "「乗り換えるべきだったのに」という過去の後悔。" },
+    { q: "A: What would you do to solve the problem <span class='blank' id='b-v'>&nbsp;</span> in my shoes?<br>B: That's a difficult question because it's very complicated.", choices: ["if you will be", "if you are", "if you were", "if you had been"], ans: "if you were", hint: "【仮定法過去】現在の事実に反する仮定。If S + 過去形。" },
+    { q: "A: <span class='blank' id='b-v'>&nbsp;</span> for your help, I couldn't have finished the task by the due date. I don't know how to thank you.<br>B: No problem. If you need my help again, let me know.", choices: ["If it were not", "If it had not been", "As if it were not", "As if it had not been"], ans: "If it had not been", hint: "「（あの時）〜がなかったら」という過去の仮定。" }
+];
+
+const dataP2 = [
+    { q: "The boy <span class='blank' id='b-v'>&nbsp;</span> his hand to ask a question, but the teacher didn't notice it.", choices: ["rise", "rose", "risen", "raised"], ans: "raised", hint: "【他動詞】「〜を上げる」は raise-raised-raised です。手が「上がる」のではなく、彼が手を「上げた(他動詞)」ので raised が正解。" },
+    { q: "The sun <span class='blank' id='b-v'>&nbsp;</span> in the east. This is a fact that never changes.", choices: ["rise", "rose", "rises", "has risen"], ans: "rises", hint: "不変の真理（太陽が昇るなど）は常に現在形です。" },
+    { q: "I finally <span class='blank' id='b-v'>&nbsp;</span> the building after walking for an hour.", choices: ["reached", "reached to", "arrived", "got"], ans: "reached", hint: "reachは他動詞。場所を直接後ろに置きます。" },
+    { 
+  q: "When I was a child, my grandmother taught me that honesty <span class='blank' id='b-v'>&nbsp;</span> the best policy.", 
+  choices: ["is", "was", "has been", "would be"], 
+  ans: "is", 
+  hint: "【不変の真理】「正直は最善の策」のようなことわざや真理は、たとえ過去の話（taught）であっても、時制の一致を受けず常に現在形 is を使います。" 
+},
+    { q: "Christopher Columbus <span class='blank' id='b-v'>&nbsp;</span> America in 1492.", choices: ["discovers", "discovered", "has discovered", "had discovered"], ans: "discovered", hint: "歴史上の事実は常に過去形。" },
+    { q: "I will call you as soon as I <span class='blank' id='b-v'>&nbsp;</span> at the station tomorrow.", choices: ["arrive", "will arrive", "arrived", "have arrived"], ans: "arrive", hint: "時を表す副詞節（as soon as）では未来のことでも現在形。" },
+   { 
+  q: "This novel <span class='blank' id='b-v'>&nbsp;</span> well all over the world since last year.", 
+  choices: ["sells", "is sold", "has been sold", "has sold"], 
+  ans: "has sold", 
+  hint: "【自動詞の継続】sellには「売れ行きが良い」という自動詞の用法があります。since（〜以来）があるため、現在形sellsではなく、過去から続く「継続」を表す現在完了形has soldが正解です。" 
+},
+    { q: "Look! The cake <span class='blank' id='b-v'>&nbsp;</span> by the dog already!", choices: ["is eaten", "has eaten", "has been eaten", "ate"], ans: "has been eaten", hint: "受動態の完了形。has been V-ed。" },
+    { q: "I'm sorry. I <span class='blank' id='b-v'>&nbsp;</span> your laptop by mistake yesterday.", choices: ["hurt", "damaged", "was damaged", "was hurting"], ans: "damaged", hint: "物にダメージを与える場合は damage を使います。" },
+    { q: "He <span class='blank' id='b-v'>&nbsp;</span> for five hours when his mother came home.", choices: ["has been studying", "had been studying", "is studying", "studied"], ans: "had been studying", hint: "過去のある時点まで続いていた動作。過去完了進行形。" },
+    { q: "That singer is known <span class='blank' id='b-v'>&nbsp;</span> everyone in this country.", choices: ["to", "for", "as", "by"], ans: "to", hint: "be known to 〜（〜に知られている）。" },
+    { q: "I <span class='blank' id='b-v'>&nbsp;</span> rather stay home than go out in this rain.", choices: ["would", "had", "should", "could"], ans: "would", hint: "would rather A than B（むしろAしたい）。" },
+    { q: "You <span class='blank' id='b-v'>&nbsp;</span> such a rude thing to her yesterday. ", choices: ["should not have said", "must have said", "shouldn't say", "ought to say"], ans: "should not have said", hint: "「〜すべきではなかった」という後悔。should not have V-ed。「昨日はあんな失礼なこと言うべきではなかったね。」" },
+    { q: "If it <span class='blank' id='b-v'>&nbsp;</span> not for water, no living thing could exist.", choices: ["is", "was", "were", "had been"], ans: "were", hint: "If it were not for 〜（もし今〜がなければ）。" },
+    { q: "He speaks English <span class='blank' id='b-v'>&nbsp;</span> he were a native speaker.", choices: ["as if", "even if", "if only", "so to speak"], ans: "as if", hint: "まるで〜であるかのように(仮定法)。" },
+    { q: "My brother <span class='blank' id='b-v'>&nbsp;</span> married his high school sweetheart last month.", choices: ["× (no prep)", "to", "with", "for"], ans: "× (no prep)", hint: "marry は他動詞。前置詞 with 等は不要。" },
+    { q: "<span class='blank' id='b-v'>&nbsp;</span> your advice, I would have failed the exam.", choices: ["With", "Without", "For", "If"], ans: "Without", hint: "Without 〜（もし〜がなかったら）。" },
+    { q: "My father <span class='blank' id='b-v'>&nbsp;</span> a newspaper when I entered the room.", choices: ["is reading", "was reading", "has read", "reads"], ans: "was reading", hint: "「〜した時、〜していた」過去進行形。" },
+    { q: "Japanese is <span class='blank' id='b-v'>&nbsp;</span> to be a difficult language to master.", choices: ["saying", "said", "has said", "been said"], ans: "said", hint: "It is said to... （〜だと言われている）。" },
+    { q: "I <span class='blank' id='b-v'>&nbsp;</span> my homework by the time my father comes back tonight. ", choices: ["finish", "finished", "am finished", "will have finished"], ans: "will have finished", hint: "未来のある時点までの完了。未来完了形。「父が今夜帰宅する時までには、宿題を終わらせているでしょう。」" },
+    { q: "You <span class='blank' id='b-v'>&nbsp;</span> better go to the dentist before it gets worse.", choices: ["would", "should", "had", "ought"], ans: "had", hint: "had better + 原形（〜したほうがいい）。" },
+    { q: "The soup <span class='blank' id='b-v'>&nbsp;</span> very good. What's in it?", choices: ["is tasted", "tastes", "has tasted", "was tasted"], ans: "tastes", hint: "taste「味がする」は受動態不可。" },
+    { q: "If I <span class='blank' id='b-v'>&nbsp;</span> more money then, I could have bought that car.", choices: ["have", "had", "had had", "would have"], ans: "had had", hint: "【仮定法過去完了】過去の事実に反する仮定。If S + had V-ed。" },
+    { q: "He is, <span class='blank' id='b-v'>&nbsp;</span>, a walking dictionary.", choices: ["so to speak", "but for", "if only", "as if"], ans: "so to speak", hint: "「いわば」は so to speak。他にも as it were がありましたね。" },
+    { q: "My sister <span class='blank' id='b-v'>&nbsp;</span> her finger when she was cooking dinner.", choices: ["cut", "was cut", "is cut", "has cut"], ans: "cut", hint: "能動態です。過去形も cut。" },
+{ q: "I <span class='blank' id='b-v'>&nbsp;</span> I could speak Spanish as fluently as you do.", choices: ["hope", "wish", "want", "if only"], ans: "wish", hint: "【仮定法】実現しそうにない願望を「〜ならいいのになぁ」と表現する時は I wish + 過去形 を使います。hope は実現可能性がある時に使います。" },
+    { q: "I <span class='blank' id='b-v'>&nbsp;</span> for the keys for two hours, but I still can't find them.", choices: ["look", "am looking", "have been looking", "looked"], ans: "have been looking", hint: "現在完了進行形。動作の継続。" }
+];
+
+let currentPart = 1;
+let currentIdx = 0;
+let score = 0;
+let quizData = dataP1;
+
+function shuffle(array) { return [...array].sort(() => Math.random() - 0.5); }
+
+function switchPart(part) {
+    currentPart = part;
+    currentIdx = 0;
+    score = 0;
+    quizData = (part === 1) ? dataP1 : dataP2;
+    document.getElementById('tab1').classList.toggle('active', part === 1);
+    document.getElementById('tab2').classList.toggle('active', part === 2);
+    document.getElementById('result-ui').style.display = 'none';
+    document.getElementById('quiz-ui').style.display = 'block';
+    loadQuestion();
+}
+
+function loadQuestion() {
+    const data = quizData[currentIdx];
+    document.getElementById('progress').textContent = `Question ${currentIdx + 1} / ${quizData.length}`;
+    document.getElementById('questionText').innerHTML = data.q;
+    document.getElementById('feedbackArea').style.display = 'none';
+    document.getElementById('nextBtn').style.display = 'none';
+    
+    const choicesArea = document.getElementById('choicesArea');
+    choicesArea.innerHTML = '';
+    shuffle(data.choices).forEach(choice => {
+        const btn = document.createElement('button');
+        btn.className = 'btn';
+        btn.textContent = choice;
+        btn.onclick = () => checkAnswer(choice, btn);
+        choicesArea.appendChild(btn);
+    });
+}
+
+function checkAnswer(selected, btn) {
+    const data = quizData[currentIdx];
+    const blank = document.getElementById('b-v');
+    const feedback = document.getElementById('feedbackArea');
+    const btns = document.querySelectorAll('.choices-area .btn');
+    
+    btns.forEach(b => b.disabled = true);
+    blank.textContent = selected;
+    
+    feedback.style.display = 'block';
+    if (selected === data.ans) {
+        score++;
+        feedback.className = 'feedback-area feedback-correct';
+        feedback.innerHTML = `<strong>Correct! 🏆</strong><br>${data.hint}`;
+        confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
+    } else {
+        feedback.className = 'feedback-area feedback-wrong';
+        feedback.innerHTML = `<strong>Try again... 正解は「${data.ans}」です。</strong><br>${data.hint}`;
+    }
+    document.getElementById('nextBtn').style.display = 'block';
+}
+
+function nextQuestion() {
+    currentIdx++;
+    if (currentIdx < quizData.length) {
+        loadQuestion();
+    } else {
+        showResult();
+    }
+}
+
+function showResult() {
+    document.getElementById('quiz-ui').style.display = 'none';
+    document.getElementById('result-ui').style.display = 'block';
+    const percent = Math.round((score / quizData.length) * 100);
+    document.getElementById('finalScore').textContent = `${score} / ${quizData.length} (${percent}%)`;
+    
+    let advice = "";
+    if(percent === 100) advice = "完璧です！準2級の文法はマスターしています。自信を持って次のステップへ進みましょう！";
+    else if(percent >= 80) advice = "素晴らしい！間違えた箇所は「自動詞・他動詞の区別」などの細かいひっかけかもしれません。解説を再確認しましょう。";
+    else if(percent >= 60) advice = "合格圏内ですが、まだ不安定な部分があります。特に助動詞の完了形や仮定法を重点的に復習しましょう。";
+    else advice = "まずは基本の時制と自動詞・他動詞の使い分けを固めましょう。繰り返しこのテストを解くことで確実に定着します！";
+    
+    document.getElementById('adviceText').innerHTML = `<strong>先生からのメッセージ:</strong><br>${advice}`;
+}
+
+function renderPrint() {
+    const ws = document.getElementById('ws-content');
+    const combinedData = [...dataP1, ...dataP2];
+    combinedData.forEach((item, i) => {
+        const div = document.createElement('div');
+        div.className = 'print-q';
+        const cleanQ = item.q.replace(/<span class='blank' id='b-v'>.*?<\/span>/, "______________________");
+        div.innerHTML = `
+            <div>${i + 1}. ${cleanQ}</div>
+            <div class="print-choices">
+                ${item.choices.map(c => `<span>[ ${c} ]</span>`).join('')}
+            </div>
+        `;
+        ws.appendChild(div);
+    });
+}
+
+window.onload = () => {
+    loadQuestion();
+    renderPrint();
+};
+</script>
+</body>
+</html>
