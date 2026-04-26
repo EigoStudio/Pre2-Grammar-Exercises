@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>17章 不定詞</title>
+    <link href="https://fonts.googleapis.com/css2?family=Andika&family=Kosugi+Maru&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root { --purple: #9b59b6; --dark: #2c3e50; --font-main: 'Andika', 'Kosugi Maru', sans-serif; }
+        body { font-family: var(--font-main); background: #f0f2f5; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        
+        .tab-container { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab { padding: 10px 20px; background: #ddd; border-radius: 10px 10px 0 0; cursor: pointer; font-weight: normal; }
+        .tab.active { background: var(--purple); color: white; }
+
+        .container { background: white; width: 95%; max-width: 900px; padding: 35px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-top: 8px solid var(--purple); text-align: center; }
+        .question-box { font-size: 1.4rem; margin-bottom: 25px; padding: 30px; background: #fdfaff; border-radius: 10px; border: 1px solid #eee; line-height: 1.7; position: relative; }
+        .translation { font-size: 1.1rem; color: #666; margin-bottom: 12px; display: block; font-weight: normal; }
+        .blank { border-bottom: 2px solid var(--purple); color: var(--purple); font-weight: bold; padding: 0 10px; }
+        
+        .btn { padding: 12px 20px; border: 1px solid #ccc; border-radius: 8px; background: white; cursor: pointer; font-size: 1.1rem; font-family: inherit; margin: 5px; transition: 0.2s; }
+        .btn:hover { border-color: var(--purple); background: #f5edfa; }
+        
+        .answer-area { min-height: 80px; border-bottom: 2px dashed var(--purple); margin: 20px 0; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; background: #fffdf9; padding: 15px; border-radius: 10px; position: relative; }
+        .word-btn { padding: 8px 16px; border: 1px solid var(--purple); border-radius: 20px; background: white; cursor: pointer; font-size: 1.1rem; margin: 5px; }
+        .word-btn.used { opacity: 0.2; pointer-events: none; }
+        
+        .pop-sentence { font-size: 1.6rem; color: var(--purple); animation: bubblePop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes bubblePop { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+        .explanation { background: #f0f8ff; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: left; font-size: 0.95rem; display: none; border-left: 4px solid #3498db; line-height: 1.5; }
+        .next-btn { display: none; background: var(--dark); color: white; border: none; padding: 12px 50px; border-radius: 30px; font-size: 1.2rem; cursor: pointer; margin: 20px auto; }
+        .speaker-btn { background: #eee; border: none; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; display: none; font-size: 1.2rem; margin: 10px auto; }
+
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; width: 100%; color: black; background: white; }
+            .print-title { font-size: 16pt; text-align: center; margin-bottom: 30px; }
+            .print-page { page-break-after: always; padding: 10px; }
+            .print-q { margin-bottom: 25px; font-size: 11pt; }
+            .print-ja { margin-bottom: 5px; font-weight: normal; }
+            .print-en { margin-left: 40px; font-size: 12pt; margin-top: 5px; }
+            .print-choices { margin-left: 40px; margin-top: 8px; display: flex; flex-wrap: wrap; gap: 15px; }
+            .choice-item { margin-right: 10px; }
+        }
+        .print-only { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="tab-container no-print">
+    <div class="tab active" onclick="changePart(1)">Part 1: 穴埋め</div>
+    <div class="tab" onclick="changePart(2)">Part 2: 並べ替え</div>
+    <div class="tab" onclick="changePart(3)">Part 3: 意味わかるかな？</div>
+</div>
+
+<div class="container no-print">
+    <div id="progress" style="color:#888; font-size:1rem; margin-bottom: 10px;"></div>
+    <div id="questionText" class="question-box"></div>
+    <div id="interactionArea"></div>
+    <div id="explanation" class="explanation"></div>
+    <button id="speakerBtn" class="speaker-btn" onclick="speakText()">🔊</button>
+    <div id="feedback" style="margin:15px; color:var(--purple); font-size: 1.3rem;"></div>
+    <button id="nextBtn" class="next-btn" onclick="nextQuestion()">Next →</button>
+    <button onclick="window.print()" style="margin-top:20px; background:none; border:none; text-decoration:underline; color:#aaa; cursor:pointer;">🖨️ ワークシートを印刷する</button>
+</div>
+
+<div id="print-area" class="print-only">
+    <div class="print-page">
+        <div class="print-title">17章 不定詞</div>
+        <div id="ws-content"></div>
+    </div>
+</div>
+
+<script>
+const quizData = [
+    // PART 1: 穴埋め (12問)
+    { part: 1, ja: "私の鍵を見つけるのを手伝ってくれるとは、あなたはとても親切でした。", q: "It was so kind <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> you to help me find my key.", choices: ["of", "for", "to", "with"], ans: "of", exp: "人の性質（kind, nice, clever等）を表す形容詞の後は of を使います。", voice: "It was so kind of you to help me find my key." },
+    { part: 1, ja: "そんな間違いをするなんて、彼は不注意だった。", q: "It was <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> such a mistake.", choices: ["careless of him to make", "careless for him making", "careless of he to make", "careless for him to make"], ans: "careless of him to make", exp: "人の性質を表す形容詞 + of + 人 + to do の形です。動名詞(making)は使いません。", voice: "It was careless of him to make such a mistake." },
+    { part: 1, ja: "ジョンは箱を開けたが、結局それは空だとわかっただけだった。", q: "John opened the box <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> to find it empty.", choices: ["only", "never", "so", "just"], ans: "only", exp: "only to do は「～したが結局…だった」という意外な結果を表します。", voice: "John opened the box only to find it empty." },
+    { part: 1, ja: "その新しい建物の建設は今度の4月に終わることになっています。", q: "The construction of the new building <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> to finish this April.", choices: ["is", "has", "was", "be"], ans: "is", exp: "be to do で公式な「予定」を表します。", voice: "The construction of the new building is to finish this April." },
+    { part: 1, ja: "メアリーは自分の指輪をなくしてしまったようです。", q: "Mary seems <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> lost her ring.", choices: ["to have", "to", "having", "to be"], ans: "to have", exp: "完了不定詞 to have + 過去分詞 は、主節の動詞(seems)よりも前の時間を表します。", voice: "Mary seems to have lost her ring." },
+    { part: 1, ja: "実を言うと、私は彼の名前を忘れてしまいました。", q: "<span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> honest, I forgot his name.", choices: ["To be", "To say", "To make", "To start"], ans: "To be", exp: "To be honest は「実を言うと」という決まった言い方です。", voice: "To be honest, I forgot his name." },
+    { part: 1, ja: "さらに悪いことに、雨が降り始めた。", q: "<span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> matters worse, it started to rain.", choices: ["To make", "To be", "To say", "To begin"], ans: "To make", exp: "To make matters worse で「さらに悪いことに」です。", voice: "To make matters worse, it started to rain." },
+    { part: 1, ja: "言うまでもなく、健康は富に勝る。", q: "<span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> to say, health is above wealth.", choices: ["Needless", "Never", "No", "Not"], ans: "Needless", exp: "Needless to say で「言うまでもなく」という独立不定詞です。", voice: "Needless to say, health is above wealth." },
+    { part: 1, ja: "まず第一に、君はもっと勉強しなければならない。", q: "<span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> with, you have to study harder.", choices: ["To begin", "To start", "To make", "To say"], ans: "To begin", exp: "To begin with は「まず第一に」と話を切り出す表現です。", voice: "To begin with, you have to study harder." },
+    { part: 1, ja: "彼は故郷を離れ、二度と戻ることはなかった。", q: "He left his town <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> to return.", choices: ["never", "only", "not", "always"], ans: "never", exp: "never to do で「～して、二度と…しなかった」という結果を表します。", voice: "He left his town never to return." },
+    { part: 1, ja: "彼は、いわば日本のエジソンだ。", q: "He is, <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span>, the Edison of Japan.", choices: ["so to speak", "to be honest", "to say nothing", "as it were"], ans: "so to speak", exp: "so to speak で「いわば」という意味になります。", voice: "He is, so to speak, the Edison of Japan." },
+    { part: 1, ja: "イタリアの天気はすばらしかったし、食べ物は言うに及びません。", q: "The weather was great, <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> of the food.", choices: ["to say nothing", "to be honest", "needless to say", "to make matters"], ans: "to say nothing", exp: "to say nothing of ～ で「～は言うまでもなく」です。", voice: "The weather was great, to say nothing of the food." },
+
+    // PART 2: 並べ替え (8問)
+    { part: 2, ja: "ロンはオフィスに電話しましたが、休暇中だと言われただけでした。", words: ["Ron", "called", "Sally's", "office", "only", "to", "be", "told", "that", "she", "was", "on", "vacation", "."], full: "Ron called Sally's office only to be told that she was on vacation.", exp: "only to be told（結局～と言われただけだった）という形です。", voice: "Ron called Sally's office only to be told that she was on vacation." },
+    { part: 2, ja: "誰も通りにいなかった。", words: ["Not", "a", "soul", "was", "to", "be", "seen", "on", "the", "street", "."], full: "Not a soul was to be seen on the street.", exp: "soul（一人、人間）という意味です。was to be seen は「見られることができた（可能）」を表す受動態です。", voice: "Not a soul was to be seen on the street." },
+    { part: 2, ja: "そんなことを言うなんて、君は賢いね。", words: ["It", "is", "wise", "of", "you", "to", "say", "so", "."], full: "It is wise of you to say so.", exp: "wise（賢い）は人の性質なので of you を使います。", voice: "It is wise of you to say so." },
+    { part: 2, ja: "彼はその試験に合格したようです。", words: ["He", "seems", "to", "have", "passed", "the", "exam", "."], full: "He seems to have passed the exam.", exp: "seems（今～に見える）＋ to have passed（過去に合格した）の完了不定詞です。", voice: "He seems to have passed the exam." },
+    { part: 2, ja: "君は宿題をしなければならない。", words: ["You", "are", "to", "do", "your", "homework", "."], full: "You are to do your homework.", exp: "be to do で「義務（～すべきだ）」を表します。", voice: "You are to do your homework." },
+    { part: 2, ja: "彼女は若くして死ぬ運命だった。", words: ["She", "was", "to", "die", "young", "."], full: "She was to die young.", exp: "be to do で「運命（～する運命だった）」を表すことがあります。", voice: "She was to die young." },
+    { part: 2, ja: "私たちは二度と会わない運命だった。", words: ["We", "were", "never", "to", "meet", "again", "."], full: "We were never to meet again.", exp: "be never to do で「二度と～しない運命だった」です。", voice: "We were never to meet again." },
+    { part: 2, ja: "率直に言って、私は彼が好きではない。", words: ["To", "be", "frank", "with", "you", ",", "I", "don't", "like", "him", "."], full: "To be frank with you, I don't like him.", exp: "To be frank with you（率直に言って）という独立不定詞です。", voice: "To be frank with you, I don't like him." },
+
+    // PART 3: 意味わかるかな？ (10問)
+    { part: 3, ja: "下線部の「意味」として最も適切なものを選んでください。", q: "The president <span style='text-decoration:underline'>is to have</span> a press conference.", choices: ["記者会見を開く予定だ", "記者会見を開くべきだ", "記者会見を開くことができる", "記者会見を開く運命だ"], ans: "記者会見を開く予定だ", exp: "ニュースなどの公的な「予定」を表します。", voice: "The president is to have a press conference." },
+    { part: 3, ja: "意味を考えよう。", q: "He <span style='text-decoration:underline'>is to be</span> blamed for the accident.", choices: ["責められるべきだ", "責められる予定だ", "責められる運命だ", "責められることができた"], ans: "責められるべきだ", exp: "「当然～すべきだ」という義務・当然の意味です。", voice: "He is to be blamed for the accident." },
+    { part: 3, ja: "意味を考えよう。", q: "She worked hard <span style='text-decoration:underline'>only to fail</span>.", choices: ["結局、失敗した", "失敗するために働いた", "失敗しないように働いた", "失敗することなく働いた"], ans: "結局、失敗した", exp: "only to do は前の文を受けて「結局～した（残念な結果）」となります。", voice: "She worked hard only to fail." },
+    { part: 3, ja: "意味を考えよう。", q: "Not a star <span style='text-decoration:underline'>was to be seen</span>.", choices: ["星は一つも見えなかった", "星を見る予定はなかった", "星を見てはいけなかった", "星を見る運命ではなかった"], ans: "星は一つも見えなかった", exp: "受動態(be seen)と合わせて「可能（～できる）」の意味になります。", voice: "Not a star was to be seen." },
+    { part: 3, ja: "意味を考えよう。", q: "It was <span style='text-decoration:underline'>thoughtful of you</span> to help her.", choices: ["君は思いやりがある", "君は助けるべきだ", "君が助けるのは当然だ", "君は助けることにした"], ans: "君は思いやりがある", exp: "thoughtful（思いやりがある）という人の性質を of で表しています。", voice: "It was thoughtful of you to help her." },
+    { part: 3, ja: "意味を考えよう。", q: "He <span style='text-decoration:underline'>seems to have been</span> rich.", choices: ["以前は金持ちだったようだ", "今、金持ちのようだ", "金持ちになるだろう", "金持ちであるはずがない"], ans: "以前は金持ちだったようだ", exp: "完了不定詞は、現在の推量(seems)よりも過去のことを指します。", voice: "He seems to have been rich." },
+    { part: 3, ja: "意味を考えよう。", q: "The meeting <span style='text-decoration:underline'>is to be held</span> tomorrow.", choices: ["開催される予定だ", "開催されるべきだ", "開催できる", "開催される運命だ"], ans: "開催される予定だ", exp: "公式行事の「予定」です。", voice: "The meeting is to be held tomorrow." },
+    { part: 3, ja: "意味を考えよう。", q: "If you <span style='text-decoration:underline'>are to win</span>, you must practice.", choices: ["勝ちたいなら", "勝つ予定なら", "勝つべきなら", "勝つことができるなら"], ans: "勝ちたいなら", exp: "If節の中の be to は「～したいなら／～するつもりなら」という意図を表します。", voice: "If you are to win, you must practice." },
+    { part: 3, ja: "意味を考えよう。", q: "To <span style='text-decoration:underline'>say nothing of</span> his English, his French is perfect.", choices: ["英語は言うまでもなく", "英語は話せないが", "英語を勉強するために", "英語は下手だが"], ans: "英語は言うまでもなく", exp: "to say nothing of ～ で「～は言うまでもなく」という挿入句です。", voice: "To say nothing of his English, his French is perfect." },
+    { part: 3, ja: "意味を考えよう。", q: "He was <span style='text-decoration:underline'>never to see</span> his family again.", choices: ["二度と会わない運命だった", "会う予定はなかった", "会ってはいけなかった", "会うことができなかった"], ans: "二度と会わない運命だった", exp: "never to see again で物語的な「運命」を表します。", voice: "He was never to see his family again." }
+];
+
+let currentIdx = 0, userSort = [], currentPart = 1;
+let filteredQuiz = quizData.filter(q => q.part === 1);
+
+function changePart(part) {
+    currentPart = part; currentIdx = 0;
+    filteredQuiz = quizData.filter(q => q.part === part);
+    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i + 1 === part));
+    loadQuestion();
+}
+
+function loadQuestion() {
+    const data = filteredQuiz[currentIdx];
+    document.getElementById('progress').textContent = `Part ${currentPart} - Q${currentIdx+1}/${filteredQuiz.length}`;
+    document.getElementById('nextBtn').style.display = "none";
+    document.getElementById('feedback').textContent = "";
+    document.getElementById('explanation').style.display = "none";
+    document.getElementById('speakerBtn').style.display = "none";
+    const interaction = document.getElementById('interactionArea');
+    interaction.style.display = "block"; interaction.innerHTML = "";
+    userSort = [];
+    const qBox = document.getElementById('questionText');
+    qBox.innerHTML = `<span class="translation">${data.ja}</span>${data.q || ""}`;
+
+    if (data.part === 1 || data.part === 3) {
+        shuffleArray(data.choices).forEach(c => {
+            const b = document.createElement('button'); b.className = "btn"; b.textContent = c;
+            b.onclick = () => { 
+                if(c === data.ans) { 
+                    const blank = document.getElementById('b-v');
+                    if(blank) { blank.textContent = c; blank.style.color = "var(--purple)"; }
+                    showWin(); 
+                } else alert("ちがうよ！");
+            };
+            interaction.appendChild(b);
+        });
+    } else if (data.part === 2) {
+        qBox.innerHTML = `<span class="translation">${data.ja}</span><div class="answer-area" id="az"></div>`;
+        const bank = document.createElement('div');
+        shuffleArray(data.words).forEach(w => {
+            const b = document.createElement('button'); b.className = "word-btn"; b.textContent = w;
+            b.onclick = () => { b.classList.add('used'); userSort.push({text:w, btn:b}); renderSort(); };
+            bank.appendChild(b);
+        });
+        interaction.appendChild(bank);
+        const ck = document.createElement('button'); ck.className = "btn"; ck.style.background="var(--purple)"; ck.style.color="white"; ck.textContent = "Check Answer";
+        ck.onclick = () => { 
+            const userText = userSort.map(i=>i.text).join(" ").replace(/ ,/g,",").replace(/ \./g,".");
+            if(userText === data.full) showWin(true); 
+            else alert("順番を確かめて！"); 
+        };
+        interaction.appendChild(ck);
+    }
+}
+
+function renderSort() {
+    const zone = document.getElementById('az'); zone.innerHTML = "";
+    userSort.forEach((item, idx) => {
+        const s = document.createElement('span'); s.className = "word-btn"; s.textContent = item.text;
+        s.onclick = () => { item.btn.classList.remove('used'); userSort.splice(idx,1); renderSort(); };
+        zone.appendChild(s);
+    });
+}
+
+function showWin(isSort = false) {
+    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+    const data = filteredQuiz[currentIdx];
+    if(isSort) {
+        // 並べ替えエリアの中身をセンテンスに置き換える（バブル演出）
+        const az = document.getElementById('az');
+        az.innerHTML = `<div class="pop-sentence">${data.full}</div>`;
+        document.getElementById('interactionArea').innerHTML = ""; // 語群ボタンを消す
+    } else {
+        document.getElementById('interactionArea').style.display = 'none';
+    }
+    const expBox = document.getElementById('explanation');
+    expBox.innerHTML = `<strong>解説:</strong> ${data.exp}`;
+    expBox.style.display = "block";
+    document.getElementById('speakerBtn').style.display = "block";
+    document.getElementById('nextBtn').style.display = "block";
+}
+
+function speakText() {
+    const data = filteredQuiz[currentIdx];
+    const uttr = new SpeechSynthesisUtterance(data.voice);
+    uttr.lang = "en-US";
+    speechSynthesis.speak(uttr);
+}
+
+function nextQuestion() {
+    currentIdx++;
+    if (currentIdx < filteredQuiz.length) loadQuestion();
+    else {
+        if(currentPart < 3) changePart(currentPart + 1);
+        else alert("すべての問題をクリアしました！お疲れ様でした。");
+    }
+}
+
+function shuffleArray(array) {
+    let result = [...array];
+    for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
+}
+
+window.onload = () => {
+    const ws = document.getElementById('ws-content');
+    quizData.forEach((q, i) => {
+        if(q.part > 2) return;
+        const div = document.createElement('div'); div.className = 'print-q';
+        let line = q.q ? q.q.replace(/<span class='blank'.*?<\/span>/, "( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )") : "__________________________________________________";
+        let choicesHtml = "";
+        if(q.choices) {
+            choicesHtml = "<div class='print-choices'>" + shuffleArray(q.choices).map((c, idx) => `<span class='choice-item'>${idx+1}. ${c}</span>`).join("") + "</div>";
+        } else if(q.words) {
+            choicesHtml = `<div class='print-en' style='font-size:10pt; color:#444;'>[ ${shuffleArray(q.words).join(" / ")} ]</div>`;
+        }
+        div.innerHTML = `<div class='print-ja'>${i+1}. ${q.ja}</div><div class='print-en'>${line}</div>${choicesHtml}`;
+        ws.appendChild(div);
+    });
+    loadQuestion();
+};
+</script>
+</body>
+</html>
