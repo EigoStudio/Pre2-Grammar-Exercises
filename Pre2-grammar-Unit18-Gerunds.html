@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>18章 動名詞</title>
+    <link href="https://fonts.googleapis.com/css2?family=Andika&family=Kosugi+Maru&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root { --teal: #16a085; --dark: #2c3e50; --font-main: 'Andika', 'Kosugi Maru', sans-serif; }
+        body { font-family: var(--font-main); background: #f0f2f5; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .container { background: white; width: 95%; max-width: 900px; padding: 35px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-top: 8px solid var(--teal); text-align: center; }
+        .question-box { font-size: 1.5rem; margin-bottom: 25px; padding: 30px; background: #fafffc; border-radius: 10px; border: 1px solid #eee; line-height: 1.7; }
+        .translation-hint { font-size: 1.1rem; color: #666; margin-bottom: 12px; display: block; font-weight: normal; }
+        .blank { border-bottom: 2px solid var(--teal); color: var(--teal); font-weight: bold; padding: 0 10px; }
+        .btn { padding: 12px 20px; border: 1px solid #ccc; border-radius: 8px; background: white; cursor: pointer; font-size: 1.1rem; font-family: inherit; margin: 5px; transition: 0.2s; }
+        .btn:hover { border-color: var(--teal); background: #edfaf5; }
+        .explanation { background: #f0fdfa; padding: 20px; border-radius: 10px; margin-top: 15px; text-align: left; font-size: 1rem; display: none; border-left: 5px solid #1abc9c; line-height: 1.6; }
+        .next-btn { display: none; background: var(--dark); color: white; border: none; padding: 12px 50px; border-radius: 30px; font-size: 1.2rem; cursor: pointer; margin: 20px auto; }
+        .speaker-btn { background: #eee; border: none; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; display: none; font-size: 1.2rem; margin: 10px auto; }
+
+        /* 印刷用設定 (コマンド+P) */
+        @media print {
+            body { background: white; padding: 0; }
+            .no-print { display: none !important; }
+            .print-only { display: block !important; width: 100%; color: black; }
+            .print-title { font-size: 18pt; text-align: center; margin-bottom: 20px; border-bottom: 2px solid black; padding-bottom: 5px; }
+            .print-q { margin-bottom: 30px; page-break-inside: avoid; border-bottom: 0px solid #ddd; padding-bottom: 0px; }
+            .print-ja { font-size: 10pt; color: #444; margin-bottom: 5px; }
+            .print-en { margin-left: 15px; font-size: 13pt; font-weight: normal; margin-bottom: 8px; }
+            .print-choices { margin-left: 20px; font-size: 10pt; font-family: serif; }
+        }
+        .print-only { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container no-print">
+    <div id="progress" style="color:#888; font-size:1rem; margin-bottom: 10px;"></div>
+    <div id="questionText" class="question-box"></div>
+    <div id="interactionArea"></div>
+    <div id="explanation" class="explanation"></div>
+    <button id="speakerBtn" class="speaker-btn" onclick="speakText()">🔊</button>
+    <div id="feedback" style="margin:15px; color:var(--teal); font-size: 1.3rem;"></div>
+    <button id="nextBtn" class="next-btn" onclick="nextQuestion()">Next →</button>
+    
+</div>
+
+<div id="print-area" class="print-only">
+    <div class="print-title">第18章 動名詞</div>
+    <div id="ws-content"></div>
+</div>
+
+<script>
+const quizData = [
+    { ja: "あなたにすぐ会えるのを楽しみにしています。", q: "I'm looking forward to <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> you soon.", choices: ["seeing", "see", "saw", "seen"], ans: "seeing", exp: "look forward to の to は前置詞なので動名詞(-ing)を続けます。", voice: "I'm looking forward to seeing you soon." },
+    { ja: "窓を開けていただけますか？", q: "Would you mind <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> the window?", choices: ["opening", "to open", "opened", "to opening"], ans: "opening", exp: "Would you mind -ing? は相手に「〜してくれますか？」と依頼する形です。", voice: "Would you mind opening the window?" },
+    { ja: "窓を開けてもよろしいですか？", q: "Would you mind <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> the window?", choices: ["my opening", "for me to open", "me to open", "to open"], ans: "my opening", exp: "「私が〜すること」の許可を求める場合、動名詞の前に所有格(my)を置きます。", voice: "Would you mind my opening the window?" },
+    { ja: "兄はビデオゲームをするのが得意です。", q: "My brother is good at <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> video games.", choices: ["playing", "play", "to play", "played"], ans: "playing", exp: "at は前置詞なので後ろは動名詞になります。", voice: "My brother is good at playing video games." },
+    { ja: "子供の頃、よくその公園に行ったものだ。", q: "I <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> to that park when I was a child.", choices: ["used to go", "am used to going", "used to going", "am used to go"], ans: "used to go", exp: "used to + 原形で「かつて〜したものだ」という過去の習慣を表します。", voice: "I used to go to that park when I was a child." },
+    { ja: "ハワイ旅行に行くことにワクワクしていますか？", q: "Are you excited about <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> on a trip to Hawaii?", choices: ["going", "to go", "go", "gone"], ans: "going", exp: "前置詞 about の後ろなので動名詞になります。", voice: "Are you excited about going on a trip to Hawaii?" },
+    { ja: "あなたにまた会えてワクワクしています。", q: "I am excited <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> you again.", choices: ["to see", "about seeing", "seeing", "seen"], ans: "to see", exp: "感情形容詞の後は不定詞(to do)で、その原因（〜して…だ）を表します。", voice: "I am excited to see you again." },
+    { ja: "ケンは自販機で缶コーヒーを買うために立ち止まった。", q: "Ken stopped <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> a can of coffee at the vending machine.", choices: ["to buy", "buying", "buy", "bought"], ans: "to buy", exp: "stop to do で「〜するために立ち止まる」という目的を表します。", voice: "Ken stopped to buy a can of coffee." },
+    { ja: "彼は歩道のごみを拾うために立ち止まった。", q: "He stopped <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> the trash on the sidewalk.", choices: ["to pick up", "picking up", "pick up", "picked up"], ans: "to pick up", exp: "足を止めて別の動作をする場合は不定詞を使います。", voice: "He stopped to pick up the trash on the sidewalk." },
+    { ja: "彼は電話に出るために立ち止まった。", q: "He stopped <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> his call.", choices: ["to take", "taking", "take", "took"], ans: "to take", exp: "「電話に出るために止まった」ので不定詞が正解です。", voice: "He stopped to take his call." },
+    { ja: "彼はその手紙を書いたことを忘れていた。", q: "He forgot <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> that letter.", choices: ["having written", "to write", "to have written", "write"], ans: "having written", exp: "以前に「書いた」事実を強調する完了動名詞(having + 過去分詞)です。", voice: "He forgot having written that letter." },
+    { ja: "彼女は奨学金をもらったことを誇りに思っている。", q: "She is proud of <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> a scholarship.", choices: ["having won", "winning", "to win", "win"], ans: "having won", exp: "「以前もらった」ことを「今誇っている」ので完了動名詞を使います。", voice: "She is proud of having won a scholarship." },
+    { ja: "彼女はパーティーに招待されなかったことに腹を立てている。", q: "She is angry about not <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> to the party.", choices: ["being invited", "having invited", "to be invited", "invited"], ans: "being invited", exp: "受動態の動名詞(being + 過去分詞)です。否定のnotは動名詞の直前に置きます。", voice: "She is angry about not being invited to the party." },
+    { ja: "もう宿題はし終えましたか？", q: "Have you finished <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> your homework yet?", choices: ["doing", "to do", "do", "done"], ans: "doing", exp: "finish は動名詞のみを目的語に取ります。", voice: "Have you finished doing your homework yet?" },
+    { ja: "今夜は夕食を作る気分ではありません。", q: "I don't feel like <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> dinner tonight.", choices: ["cooking", "to cook", "cook", "cooked"], ans: "cooking", exp: "feel like -ing で「〜したい気分だ」です。", voice: "I don't feel like cooking dinner tonight." },
+    { ja: "私たちは休暇で京都に行くことに決めた。", q: "We decided <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> to Kyoto.", choices: ["to go", "going", "go", "to going"], ans: "to go", exp: "decide は不定詞(to do)のみを目的語に取ります。", voice: "We decided to go to Kyoto." },
+    { ja: "彼は健康のためにタバコをやめた。", q: "He quit <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> because of his health.", choices: ["smoking", "to smoke", "smoke", "smoked"], ans: "smoking", exp: "quit は動名詞を目的語に取ります。", voice: "He quit smoking because of his health." },
+    { ja: "先月のパーティーで彼に会ったことを覚えています。", q: "I remember <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> him at the party.", choices: ["meeting", "to meet", "meet", "met"], ans: "meeting", exp: "remember -ing で「（過去に）〜したことを覚えている」です。", voice: "I remember meeting him at the party." },
+    { ja: "ドアの鍵をかけるのを忘れないでね。", q: "Please remember <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> the door.", choices: ["to lock", "locking", "lock", "locked"], ans: "to lock", exp: "remember to do で「（これから）忘れずに〜する」です。", voice: "Please remember to lock the door." },
+    { ja: "沖縄で見た夕日は決して忘れません。", q: "I'll never forget <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> the sunset in Okinawa.", choices: ["seeing", "to see", "see", "saw"], ans: "seeing", exp: "forget -ing で過去の体験を忘れる、という意味になります。", voice: "I'll never forget seeing the sunset in Okinawa." },
+    { ja: "残念ながら、お申し出はお受けできないとお知らせします。", q: "I regret <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> you that we cannot accept your offer.", choices: ["to inform", "informing", "inform", "informed"], ans: "to inform", exp: "regret to do は「残念ながら〜します」という公式な表現です。", voice: "I regret to inform you that we cannot accept your offer." },
+    { ja: "彼はそのお金を盗んだことを否定した。", q: "He denied <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> the money.", choices: ["having stolen", "to steal", "steal", "to have stolen"], ans: "having stolen", exp: "denyは動名詞を取ります。過去の行為の否定なので完了動名詞にします。", voice: "He denied having stolen the money." },
+    { ja: "私が遅れることを気にしないでください。", q: "Don't mind <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> late.", choices: ["my being", "me to be", "I am", "to be"], ans: "my being", exp: "動名詞の意味上の主語は、直前に所有格(my)などを置きます。", voice: "Don't mind my being late." },
+    { ja: "散歩に出かけるのはどうですか？", q: "What do you say to <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> for a walk?", choices: ["going", "go", "to go", "gone"], ans: "going", exp: "What do you say to -ing? の to は前置詞なので動名詞がきます。", voice: "What do you say to going for a walk?" },
+    { ja: "心配しても無駄だ。", q: "It is no use <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> about it.", choices: ["worrying", "to worry", "worry", "worried"], ans: "worrying", exp: "It is no use -ing で「〜しても無駄だ」という慣用句です。", voice: "It is no use worrying about it." }
+];
+
+let currentIdx = 0;
+
+function loadQuestion() {
+    const data = quizData[currentIdx];
+    document.getElementById('progress').textContent = `Problem ${currentIdx+1} / ${quizData.length}`;
+    document.getElementById('nextBtn').style.display = "none";
+    document.getElementById('explanation').style.display = "none";
+    document.getElementById('speakerBtn').style.display = "none";
+    const interaction = document.getElementById('interactionArea');
+    interaction.innerHTML = "";
+    
+    // ブラウザ画面では和訳をヒントとして表示
+    document.getElementById('questionText').innerHTML = `<span class="translation-hint">${data.ja}</span>${data.q}`;
+
+    shuffleArray(data.choices).forEach(c => {
+        const b = document.createElement('button'); b.className = "btn"; b.textContent = c;
+        b.onclick = () => { 
+            if(c === data.ans) { 
+                document.getElementById('b-v').textContent = c;
+                showWin(); 
+            } else alert("ちがうよ！和訳をもう一度見てみて。");
+        };
+        interaction.appendChild(b);
+    });
+}
+
+function showWin() {
+    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#16a085', '#1abc9c'] });
+    document.getElementById('explanation').innerHTML = `<strong>解説：</strong>${quizData[currentIdx].exp}`;
+    document.getElementById('explanation').style.display = "block";
+    document.getElementById('speakerBtn').style.display = "block";
+    document.getElementById('nextBtn').style.display = "block";
+}
+
+function speakText() {
+    const uttr = new SpeechSynthesisUtterance(quizData[currentIdx].voice);
+    uttr.lang = "en-US";
+    speechSynthesis.speak(uttr);
+}
+
+function nextQuestion() {
+    currentIdx++;
+    if (currentIdx < quizData.length) loadQuestion();
+    else alert("全25問、完了！PDFもぜひ活用してくださいね。");
+}
+
+function shuffleArray(array) {
+    let result = [...array];
+    for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
+}
+
+window.onload = () => {
+    const ws = document.getElementById('ws-content');
+    quizData.forEach((q, i) => {
+        const div = document.createElement('div'); div.className = 'print-q';
+        let line = q.q.replace(/<span class='blank'.*?<\/span>/, " ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) ");
+        let choicesHtml = "<div class='print-choices'>" + 
+            shuffleArray(q.choices).map((c, idx) => `(${idx+1}) ${c} &nbsp;&nbsp;`).join("") + "</div>";
+        div.innerHTML = `<div class='print-ja'>${i+1}. ${q.ja}</div><div class='print-en'>${line}</div>${choicesHtml}`;
+        ws.appendChild(div);
+    });
+    loadQuestion();
+};
+</script>
+</body>
+</html>
