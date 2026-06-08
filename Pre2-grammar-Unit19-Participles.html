@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>19章 分詞構文</title>
+    <link href="https://fonts.googleapis.com/css2?family=Andika&family=Kosugi+Maru&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root { 
+            --teal: #16a085; 
+            --dark: #2c3e50; 
+            --font-main: 'Andika', 'Kosugi Maru', sans-serif; 
+        }
+        body { 
+            font-family: var(--font-main); 
+            background: #f0f2f5; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 20px; 
+            margin: 0;
+        }
+        .container { 
+            background: white; 
+            width: 95%; 
+            max-width: 950px; /* 横幅を少し広げて1行に収まりやすく調整 */
+            padding: 35px; 
+            border-radius: 20px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+            border-top: 8px solid var(--teal); 
+            text-align: center; 
+            position: relative;
+            margin-top: 20px;
+        }
+        /* 右上の端っこに大人しく佇む小さなタイトル */
+        .sub-title-corner {
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 0.85rem;
+            color: #95a5a6;
+            font-weight: normal;
+        }
+        .progress-bar { 
+            font-size: 0.95rem; 
+            color: #7f8c8d; 
+            margin-bottom: 15px; 
+            font-weight: bold;
+        }
+        .transform-hint {
+            font-size: 1.1rem;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+        .question-box { 
+            font-size: 1.4rem; 
+            margin-bottom: 25px; 
+            padding: 25px; 
+            background: #fafffc; 
+            border-radius: 10px; 
+            border: 1px solid #eee; 
+            line-height: 1.8; 
+            text-align: left; /* 左詰めにすることで英文を読みやすく */
+            white-space: nowrap; /* テキストの意図しない改行を防ぐ */
+        }
+        /* 書き換え問題など、意図的な改行（<br>）がある場合のみ折り返しを許可 */
+        .question-box.has-br {
+            white-space: normal;
+        }
+        .sentence-line {
+            display: block;
+            margin-bottom: 8px;
+            white-space: nowrap;
+        }
+        /* 下線付きの空欄スペース */
+        .blank { 
+            display: inline-block;
+            border-bottom: 2px solid var(--teal); 
+            color: var(--teal); 
+            min-width: 130px; /* 空欄の幅をしっかり確保 */
+            text-align: center;
+            font-weight: bold;
+            margin: 0 5px;
+        }
+        .btn-container { 
+            display: flex; 
+            justify-content: center; 
+            flex-wrap: wrap; 
+            gap: 15px; 
+            margin-top: 10px; 
+        }
+        .btn { 
+            padding: 12px 25px; 
+            border: 2px solid #ddd; 
+            border-radius: 8px; 
+            background: white; 
+            cursor: pointer; 
+            font-size: 1.2rem; 
+            font-family: inherit; 
+            transition: all 0.2s; 
+            min-width: 140px;
+        }
+        .btn:hover { 
+            border-color: var(--teal); 
+            background: #edfaf5; 
+        }
+        .explanation { 
+            background: #f0fdfa; 
+            padding: 20px; 
+            border-radius: 10px; 
+            margin-top: 25px; 
+            text-align: left; 
+            font-size: 1.1rem; 
+            display: none; 
+            border-left: 5px solid var(--teal); 
+            line-height: 1.6; 
+        }
+        .translation-text {
+            font-weight: bold;
+            color: var(--teal);
+            display: block;
+            margin-bottom: 8px;
+        }
+        .next-btn { 
+            display: none; 
+            background: var(--dark); 
+            color: white; 
+            border: none; 
+            padding: 12px 40px; 
+            border-radius: 25px; 
+            font-size: 1.2rem; 
+            cursor: pointer; 
+            margin: 20px auto 0; 
+        }
+        .next-btn:hover { opacity: 0.9; }
+
+        /* ----------------------------------------------------
+           印刷用スタイル (Command + P) - A4 2枚に最適化
+        ---------------------------------------------------- */
+        @media print {
+            body { background: white; padding: 0; margin: 0; color: black; }
+            .no-print { display: none !important; }
+            .print-only { display: block !important; width: 100%; }
+            .print-header { 
+                text-align: center; 
+                border-bottom: 2px solid black; 
+                margin-bottom: 15px; 
+                padding-bottom: 5px;
+            }
+            .print-header h1 { font-size: 16pt; margin: 0; }
+            .print-container {
+                display: block;
+            }
+            .print-q { 
+                margin-bottom: 12px; 
+                page-break-inside: avoid; 
+                padding-bottom: 8px;
+                border-bottom: 1px dashed #ccc;
+                font-size: 10.5pt;
+            }
+            .print-en { font-size: 11pt; margin-bottom: 4px; line-height: 1.4; font-family: 'Times New Roman', serif; }
+            .print-choices { font-size: 9.5pt; margin-left: 15px; word-spacing: 15px; font-family: 'Times New Roman', serif; }
+        }
+        .print-only { display: none; }
+    </style>
+</head>
+<body>
+
+<!-- オンラインアクティビティ画面 -->
+<div class="container no-print">
+    <div class="sub-title-corner">19章 分詞構文</div>
+    <div id="progress" class="progress-bar"></div>
+    
+    <div id="questionContainer">
+        <div id="transformLabel" class="transform-hint"></div>
+        <div id="questionText" class="question-box"></div>
+    </div>
+
+    <div id="interactionArea" class="btn-container"></div>
+    <div id="explanation" class="explanation"></div>
+    <button id="nextBtn" class="next-btn" onclick="nextQuestion()">Next →</button>
+</div>
+
+<!-- 印刷用ワークシート画面 -->
+<div id="print-area" class="print-only">
+    <div class="print-header">
+        <h1>第19章 分詞構文 ワークシート</h1>
+    </div>
+    <div id="ws-content" class="print-container"></div>
+</div>
+
+<script>
+const quizData = [
+    // 1〜6問目：後置修飾の復習
+    { type: "review", ja: "ベンチで本を読んでいる少年は私の弟です。", q: "<span class='sentence-line'>The boy <span class='blank'>&nbsp;</span> a book on the bench is my brother.</span>", choices: ["reading", "read", "to reading"], ans: "reading", exp: "少年が「（本を）読んでいる」という能動・進行の関係なので現在分詞(-ing)が正解です。" },
+    { type: "review", ja: "これは英語で書かれた手紙です。", q: "<span class='sentence-line'>This is a letter <span class='blank'>&nbsp;</span> in English.</span>", choices: ["written", "writing", "wrote"], ans: "written", exp: "手紙は英語で「書かれた」ものという受動の関係なので過去分詞が正解です。" },
+    { type: "review", ja: "向こうで泣いている赤ちゃんを見てごらんなさい。", q: "<span class='sentence-line'>Look at the baby <span class='blank'>&nbsp;</span> over there.</span>", choices: ["crying", "cried", "to cry"], ans: "crying", exp: "赤ちゃん自身が「泣いている」という能動・進行の関係なので現在分詞が正解です。" },
+    { type: "review", ja: "私は日本で作られた車を買いたいです。", q: "<span class='sentence-line'>I want to buy a car <span class='blank'>&nbsp;</span> in Japan.</span>", choices: ["made", "making", "make"], ans: "made", exp: "車は日本で「作られた」ものという受動の関係なので過去分詞が正解です。" },
+    { type: "review", ja: "あそこでサッカーをしている男性たちは親切です。", q: "<span class='sentence-line'>The men <span class='blank'>&nbsp;</span> soccer over there are kind.</span>", choices: ["playing", "played", "plays"], ans: "playing", exp: "男性たちがサッカーを「している」という能動の関係なので現在分詞が正解です。" },
+    { type: "review", ja: "これは多くの人々に愛されている歌です。", q: "<span class='sentence-line'>This is a song <span class='blank'>&nbsp;</span> by many people.</span>", choices: ["loved", "loving", "love"], ans: "loved", exp: "歌は人々から「愛されている」という受動の関係なので過去分詞が正解です。" },
+    
+    // 7〜20問目：分詞構文
+    { type: "transform", hint: "Change the sentence using a participle phrase:", ja: "主人を見たとき、その犬はしっぽを振った。", q: "<span class='sentence-line'>When the dog saw its master, it wagged its tail.</span><span class='sentence-line'>→ <span class='blank'>&nbsp;</span> its master, the dog wagged its tail.</span>", choices: ["Seeing", "Seen", "To see"], ans: "Seeing", exp: "主節の主語(the dog)が「見た（能動）」ので、現在分詞のSeeingで文を始めます。" },
+    { type: "meaning", ja: "主人を見たとき、その犬はしっぽを振った。", q: "<span class='sentence-line'><b>Seeing its master</b>, the dog wagged its tail.</span>", choices: ["同時", "結果", "譲歩"], ans: "同時", exp: "「主人を見たとき」という、主節の動作とほぼ同時に起きた状況（時・付帯状況）を表します。" },
+    { type: "passive", ja: "先生に叱られたので、その生徒は悲しそうに見えた。", q: "<span class='sentence-line'><span class='blank'>&nbsp;</span> by the teacher, the student looked sad.</span>", choices: ["Scolded", "Scolding", "Scold"], ans: "Scolded", exp: "生徒が先生に「叱られた（受動）」という理由を表すため、過去分詞のScoldedで始めます（Beingが省略された形です）。" },
+    { type: "standard", ja: "彼は音楽を聴きながら、部屋で勉強していた。", q: "<span class='sentence-line'><span class='blank'>&nbsp;</span> to music, he studied in his room.</span>", choices: ["Listening", "Listened", "Listen"], ans: "Listening", exp: "彼が「音楽を聴きながら」勉強していたという、並行する動作（同時・付帯状況）を表します。" },
+    { type: "standard", ja: "何と言っていいか分からなかったので、彼女は黙っていた。", q: "<span class='sentence-line'><span class='blank'>&nbsp;</span> what to say, she kept silent.</span>", choices: ["Not knowing", "Knowing not", "Don't know"], ans: "Not knowing", exp: "分詞構文の否定形は、分詞の直前にnotを置くのが鉄則です。" },
+    { type: "meaning", ja: "英語で書かれているので、この本は外国人にとって読みやすい。", q: "<span class='sentence-line'><b>Written in English</b>, this book is easy for foreigners to read.</span>", choices: ["理由", "同時", "譲歩"], ans: "理由", exp: "「英語で書かれているので」という、後ろの主節に対する原因・理由を表します。" },
+    { type: "result", ja: "その列車は午前8時に出発し、11時に東京に到着した。", q: "<span class='sentence-line'>The train left at 8 a.m., <span class='blank'>&nbsp;</span> in Tokyo at 11 a.m.</span>", choices: ["arriving", "arrived", "to arrive"], ans: "arriving", exp: "「出発し、そして到着した」という、前の動作から連続して起きた「結果」を表します。" },
+    { type: "perfect", ja: "以前にその映画を見たことがあったので、私はストーリーをよく知っていた。", q: "<span class='sentence-line'><span class='blank'>&nbsp;</span> the movie before, I knew the story well.</span>", choices: ["Having seen", "Seeing", "Saw"], ans: "Having seen", exp: "映画を「見た」のは、ストーリーを「知っていた（過去）」ときよりも【さらに前の過去】なので、完了形の分詞構文(Having + 過去分詞)にします。" },
+    { type: "meaning", ja: "その街に住んでいるけれども、彼はその有名な城を一度も訪れたことがない。", q: "<span class='sentence-line'><b>Living in the city</b>, he has never visited the famous castle.</span>", choices: ["譲歩", "理由", "結果"], ans: "譲歩", exp: "「その街に住んでいるけれど（〜だが）」という、主節の内容に対する逆説・譲歩を表します。" },
+    { type: "perfect_passive", ja: "犬に噛まれたことがあったので、私は犬が怖い。", q: "<span class='sentence-line'><span class='blank'>&nbsp;</span> by a dog, I'm afraid of dogs.</span>", choices: ["Having been bitten", "Biting", "Having bitten"], ans: "Having been bitten", exp: "犬に「噛まれた（受動）」のが、今の「怖い（現在）」よりも【前の過去】なので、完了形＋受動態(Having been + 過去分詞)を組み合わせます。" },
+    { type: "meaning", ja: "気分が悪かったので、ケンは早く寝た。", q: "<span class='sentence-line'><b>Feeling sick</b>, Ken went to bed early.</span>", choices: ["理由", "譲歩", "結果"], ans: "理由", exp: "「気分が悪かったので」という、早く寝た行動に対する原因・理由を表します。" },
+    { type: "transform", hint: "Change the sentence using a participle phrase:", ja: "返事をもらえなかったので、彼はもう一度彼女に電話した。", q: "<span class='sentence-line'>Because he didn't receive an answer, he called her again.</span><span class='sentence-line'>→ <span class='blank'>&nbsp;</span> an answer, he called her again.</span>", choices: ["Not receiving", "Receiving not", "Didn't receive"], ans: "Not receiving", exp: "元の文のdidn'tという過去の否定も、主節と同じ時制の否定であれば「Not + 現在分詞(-ing)」でスマートに表現できます。" },
+    { type: "perfect", ja: "宿題を終えていたので、トムは友達とゲームを始めた。", q: "<span class='sentence-line'><span class='blank'>&nbsp;</span> his homework, Tom started playing games with his friends.</span>", choices: ["Having finished", "Finishing", "Finished"], ans: "Having finished", exp: "宿題を「終えた」のは、ゲームを「始めた（過去）」よりも【前の過去】なので、完了形の分詞構文にします。" },
+    { type: "meaning", ja: "彼女はさよならと言って、手を振った。", q: "<span class='sentence-line'><b>Saying goodbye</b>, she waved her hand.</span>", choices: ["同時", "理由", "譲歩"], ans: "同時", exp: "「さよならと言いながら（同時）」手を振ったという、連続・並行する付帯状況を表します。" }
+];
+
+let currentIdx = 0;
+
+function shuffleArray(array) {
+    let result = [...array];
+    for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
+}
+
+function loadQuestion() {
+    const data = quizData[currentIdx];
+    document.getElementById('progress').textContent = `Problem ${currentIdx + 1} / ${quizData.length}`;
+    document.getElementById('nextBtn').style.display = "none";
+    document.getElementById('explanation').style.display = "none";
+    
+    const transformLabel = document.getElementById('transformLabel');
+    transformLabel.innerHTML = data.hint ? data.hint : "";
+
+    const qBox = document.getElementById('questionText');
+    qBox.innerHTML = data.q;
+    
+    // 書き換え文（矢印を含む問題）のみ、複数行の構造を保つためにクラスを変更
+    if (data.type === "transform") {
+        qBox.className = "question-box has-br";
+    } else {
+        qBox.className = "question-box";
+    }
+
+    const interaction = document.getElementById('interactionArea');
+    interaction.innerHTML = "";
+    const shuffledChoices = shuffleArray(data.choices);
+    
+    shuffledChoices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.className = "btn";
+        btn.textContent = choice;
+        btn.onclick = () => checkAnswer(choice, data.ans);
+        interaction.appendChild(btn);
+    });
+}
+
+function checkAnswer(selected, correct) {
+    const data = quizData[currentIdx];
+    const explanation = document.getElementById('explanation');
+    
+    if (selected === correct) {
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#16a085', '#2c3e50'] });
+        
+        const blankSpans = document.querySelectorAll('.question-box .blank');
+        blankSpans.forEach(span => {
+            span.textContent = correct;
+            span.style.padding = "0 15px";
+        });
+
+        explanation.innerHTML = `<span class="translation-text">【和訳】${data.ja}</span><strong>解説：</strong>${data.exp}`;
+        explanation.style.display = "block";
+        document.getElementById('nextBtn').style.display = "block";
+        
+        document.querySelectorAll('.btn').forEach(b => b.disabled = true);
+    } else {
+        alert("Try again! 文のカタチや意味のつながりをもお一度確認してみよう。");
+    }
+}
+
+function nextQuestion() {
+    currentIdx++;
+    if (currentIdx < quizData.length) {
+        loadQuestion();
+    } else {
+        alert("お見事！全20問完了しました。最初の問題に戻ります。");
+        currentIdx = 0;
+        loadQuestion();
+    }
+}
+
+function generateWorksheet() {
+    const ws = document.getElementById('ws-content');
+    ws.innerHTML = "";
+    
+    quizData.forEach((item, i) => {
+        const div = document.createElement('div');
+        div.className = 'print-q';
+        
+        let displayEn = item.q;
+        // 印刷用：穴埋めをシンプルな「_______」に変換（意味問題を除く）
+        if (item.type !== "meaning") {
+            displayEn = item.q.replace(/<span class='blank'.*?<\/span>/g, " _____________________ ");
+        }
+
+        const printChoices = shuffleArray(item.choices).map((c, idx) => `(${idx + 1}) ${c}`).join(" &nbsp;&nbsp;&nbsp;&nbsp; ");
+        
+        div.innerHTML = `
+            <div class="print-en"><b>Q${i + 1}.</b> ${displayEn}</div>
+            <div class="print-choices">${printChoices}</div>
+        `;
+        ws.appendChild(div);
+    });
+}
+
+window.onload = () => {
+    generateWorksheet();
+    loadQuestion();
+};
+</script>
+</body>
+</html>
