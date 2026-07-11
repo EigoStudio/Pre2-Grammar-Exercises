@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>20章 関係詞①</title>
+    <link href="https://fonts.googleapis.com/css2?family=Andika&family=Kosugi+Maru&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root { 
+            --teal: #16a085; 
+            --dark: #2c3e50; 
+            --font-main: 'Andika', 'Kosugi Maru', sans-serif; 
+        }
+        body { 
+            font-family: var(--font-main); 
+            background: #f0f2f5; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 20px; 
+            margin: 0;
+        }
+        .container { 
+            background: white; 
+            width: 95%; 
+            max-width: 950px; 
+            padding: 35px; 
+            border-radius: 20px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+            border-top: 8px solid var(--teal); 
+            text-align: center; 
+            position: relative;
+            margin-top: 20px;
+        }
+        .sub-title-corner {
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 0.85rem;
+            color: #95a5a6;
+            font-weight: normal;
+        }
+        /* タブメニューのスタイル */
+        .tab-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 15px;
+        }
+        .tab-btn {
+            padding: 8px 16px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-family: inherit;
+            font-weight: bold;
+            color: #7f8c8d;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background: var(--teal);
+            color: white;
+            border-color: var(--teal);
+        }
+        .progress-bar { 
+            font-size: 0.95rem; 
+            color: #7f8c8d; 
+            margin-bottom: 15px; 
+            font-weight: bold;
+        }
+        .question-box { 
+            font-size: 1.4rem; 
+            margin-bottom: 25px; 
+            padding: 25px; 
+            background: #fafffc; 
+            border-radius: 10px; 
+            border: 1px solid #eee; 
+            line-height: 1.8; 
+            text-align: left; 
+            white-space: nowrap; 
+        }
+        .sentence-line {
+            display: block;
+            margin-bottom: 8px;
+            white-space: nowrap;
+        }
+        .blank { 
+            display: inline-block;
+            border-bottom: 2px solid var(--teal); 
+            color: var(--teal); 
+            min-width: 130px; 
+            text-align: center;
+            font-weight: bold;
+            margin: 0 5px;
+        }
+        .btn-container { 
+            display: flex; 
+            justify-content: center; 
+            flex-wrap: wrap; 
+            gap: 15px; 
+            margin-top: 10px; 
+        }
+        .btn { 
+            padding: 12px 25px; 
+            border: 2px solid #ddd; 
+            border-radius: 8px; 
+            background: white; 
+            cursor: pointer; 
+            font-size: 1.2rem; 
+            font-family: inherit; 
+            transition: all 0.2s; 
+            min-width: 140px;
+        }
+        .btn:hover { 
+            border-color: var(--teal); 
+            background: #edfaf5; 
+        }
+        .btn.selected {
+            background: var(--teal);
+            color: white;
+            border-color: var(--teal);
+        }
+        .action-btn-container {
+            margin-top: 25px;
+        }
+        .submit-btn {
+            background: var(--teal);
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+        }
+        .submit-btn:hover { opacity: 0.9; }
+        
+        .explanation { 
+            background: #f0fdfa; 
+            padding: 20px; 
+            border-radius: 10px; 
+            margin-top: 25px; 
+            text-align: left; 
+            font-size: 1.1rem; 
+            display: none; 
+            border-left: 5px solid var(--teal); 
+            line-height: 1.6; 
+        }
+        .translation-text {
+            font-weight: bold;
+            color: var(--teal);
+            display: block;
+            margin-bottom: 8px;
+        }
+        .next-btn { 
+            display: none; 
+            background: var(--dark); 
+            color: white; 
+            border: none; 
+            padding: 12px 40px; 
+            border-radius: 25px; 
+            font-size: 1.2rem; 
+            cursor: pointer; 
+            margin: 20px auto 0; 
+        }
+        .next-btn:hover { opacity: 0.9; }
+
+        @media print {
+            body { background: white; padding: 0; margin: 0; color: black; }
+            .no-print { display: none !important; }
+            .print-only { display: block !important; width: 100%; }
+            .print-header { 
+                text-align: center; 
+                border-bottom: 2px solid black; 
+                margin-bottom: 15px; 
+                padding-bottom: 5px;
+            }
+            .print-header h1 { font-size: 16pt; margin: 0; }
+            .print-section-title { font-size: 11pt; font-weight: bold; margin-top: 20px; margin-bottom: 10px; background: #eee; padding: 5px; page-break-after: avoid; }
+            .print-container { display: block; }
+            .print-q { 
+                margin-bottom: 12px; 
+                page-break-inside: avoid; 
+                padding-bottom: 8px;
+                border-bottom: 1px dashed #ccc;
+                font-size: 10pt;
+            }
+            .print-en { font-size: 10.5pt; margin-bottom: 4px; line-height: 1.4; font-family: 'Times New Roman', serif; }
+            .print-choices { font-size: 9.5pt; margin-left: 15px; word-spacing: 15px; font-family: 'Times New Roman', serif; }
+        }
+        .print-only { display: none; }
+    </style>
+</head>
+<body>
+
+<!-- オンラインアクティビティ画面 -->
+<div class="container no-print">
+    <div class="sub-title-corner">20章 関係詞①</div>
+    
+    <!-- タブ切り替えボタン -->
+    <div class="tab-container">
+        <button id="tab1" class="tab-btn active" onclick="switchSection(1)">Sec 1 (主格)</button>
+        <button id="tab2" class="tab-btn" onclick="switchSection(2)">Sec 2 (目的格)</button>
+        <button id="tab3" class="tab-btn" onclick="switchSection(3)">Sec 3 (正誤判定)</button>
+        <button id="tab4" class="tab-btn" onclick="switchSection(4)">Sec 4 (that/what)</button>
+        <button id="tab5" class="tab-btn" onclick="switchSection(5)">Sec 5 (カンマ付き)</button>
+        <button id="tab6" class="tab-btn" onclick="switchSection(6)">Sec 6 (whose)</button>
+    </div>
+
+    <div id="progress" class="progress-bar"></div>
+    
+    <div id="questionContainer">
+        <div id="questionText" class="question-box"></div>
+    </div>
+
+    <!-- 案内文の動的切り替え用 -->
+    <div id="guideText" style="font-size: 0.9rem; color: #7f8c8d; margin-bottom: 10px;"></div>
+    
+    <div id="interactionArea" class="btn-container"></div>
+    
+    <div class="action-btn-container">
+        <button id="submitBtn" class="submit-btn" onclick="checkMultipleAnswers()">Answer (決定) ↵</button>
+    </div>
+
+    <div id="explanation" class="explanation"></div>
+    <button id="nextBtn" class="next-btn" onclick="nextQuestion()">Next →</button>
+</div>
+
+<!-- 印刷用ワークシート画面 -->
+<div id="print-area" class="print-only">
+    <div class="print-header">
+        <h1>第20章 関係詞① ワークシート</h1>
+    </div>
+    <div class="print-section-title">■ Section 1: 主格の関係代名詞 (who / which / that)</div>
+    <div id="ws-content-1" class="print-container"></div>
+    
+    <div class="print-section-title">■ Section 2: 目的格の関係代名詞 (who / whom / which / that / 省略)</div>
+    <div id="ws-content-2" class="print-container"></div>
+
+    <div class="print-section-title">■ Section 3: 正誤判定 (OK / ❌)</div>
+    <div id="ws-content-3" class="print-container"></div>
+
+    <div class="print-section-title">■ Section 4: 関係代名詞の使い分け (that / what)</div>
+    <div id="ws-content-4" class="print-container"></div>
+
+    <div class="print-section-title">■ Section 5: カンマ付きの関係代名詞 (, who / , which / , that / カンマなしのwhich)</div>
+    <div id="ws-content-5" class="print-container"></div>
+
+    <div class="print-section-title">■ Section 6: 所有格の限定ミックス (who / whose)</div>
+    <div id="ws-content-6" class="print-container"></div>
+</div>
+
+<script>
+// クイズデータ定義
+const quizSections = {
+    1: [
+        { ja: "事故で怪我をした少女は、今入院しています。", q: "<span class='sentence-line'>The girl <span class='blank'>&nbsp;</span> was injured in the accident is now in hospital.</span>", choices: ["who", "which", "that"], ans: ["who", "that"], mode: "multi", exp: "先行詞が「人(The girl)」で、空欄の後ろに動詞(was)が続いているため、主格の関係代名詞が入ります。whoだけでなく、その代わりになるthatも正解です。" },
+        { ja: "私たちに応対したウェイトレスは、不作法で不機嫌でした。", q: "<span class='sentence-line'>The waitress <span class='blank'>&nbsp;</span> served us was impolite and impatient.</span>", choices: ["who", "which", "that"], ans: ["who", "that"], mode: "multi", exp: "先行詞が「人(The waitress)」で、後ろの動詞(served)の主語になる主格です。whoとthatの両方が使えます。" },
+        { ja: "火事で全壊した建物は、今や再建されました。", q: "<span class='sentence-line'>The building <span class='blank'>&nbsp;</span> was destroyed in the fire has now been rebuilt.</span>", choices: ["who", "which", "that"], ans: ["which", "that"], mode: "multi", exp: "先行詞が「物(The building)」なので、主格の関係代名詞はwhichになります。また、whichの代わりになるthatも正解です。" },
+        { ja: "逮捕された人たちは、すでに釈放されました。", q: "<span class='sentence-line'>The people <span class='blank'>&nbsp;</span> were arrested have now been released.</span>", choices: ["who", "which", "that"], ans: ["who", "that"], mode: "multi", exp: "先行詞が「人(The people)」の複数形です。後ろに動詞(were)が続く主格なので、whoとthatが正解です。" },
+        { ja: "空港へ行くバスは、30分ごとに運行しています。", q: "<span class='sentence-line'>The bus <span class='blank'>&nbsp;</span> goes to the airport runs every half hour.</span>", choices: ["who", "which", "that"], ans: ["which", "that"], mode: "multi", exp: "先行詞が「乗り物・物(The bus)」なのでwhichが適切です。thatも同じように使うことができます。" },
+        { ja: "私の隣に座っていた男性は、ずっと話し続けていました。", q: "<span class='sentence-line'>The man <span class='blank'>&nbsp;</span> sat next to me kept talking all the time.</span>", choices: ["who", "which", "that"], ans: ["who", "that"], mode: "multi", exp: "先行詞が「人(The man)」で、後ろの動詞(sat)の主語となる主格です。whoとthatが選べます。" },
+        { ja: "ニュージーランドで読まれている言語は英語です。", q: "<span class='sentence-line'>The language <span class='blank'>&nbsp;</span> is spoken in New Zealand is English.</span>", choices: ["who", "which", "that"], ans: ["which", "that"], mode: "multi", exp: "先行詞が「言語・物(The language)」なので、主格の関係代名詞であるwhichとthatが正解になります。" },
+        { ja: "親切な心を持つ人々は、みんなに愛されます。", q: "<span class='sentence-line'>People <span class='blank'>&nbsp;</span> have kind hearts are loved by everyone.</span>", choices: ["who", "which", "that"], ans: ["who", "that"], mode: "multi", exp: "先行詞が「人(People)」です。後ろに動詞(have)が続いているので、主格のwhoとthatが正解です。" },
+        { ja: "昨日開店した新しい店には、たくさんの客が来ました。", q: "<span class='sentence-line'>The new shop <span class='blank'>&nbsp;</span> opened yesterday had many customers.</span>", choices: ["who", "which", "that"], ans: ["which", "that"], mode: "multi", exp: "先行詞が「店・物(The new shop)」なので、主格のwhichと、その代わりになるthatが選べます。" },
+        { ja: "私を一番に助けてくれたのは、私の科学の先生でした。", q: "<span class='sentence-line'>The person <span class='blank'>&nbsp;</span> helped me first was my science teacher.</span>", choices: ["who", "which", "that"], ans: ["who", "that"], mode: "multi", exp: "先行詞が「人(The person)」なので、主格のwhoと、万能なthatの両方が正解になります。" }
+    ],
+    2: [
+        { ja: "あなたが失くした鍵は見つかりましたか？", q: "<span class='sentence-line'>Have you found the keys <span class='blank'>&nbsp;</span> you lost?</span>", choices: ["who", "which", "that", "（省略）"], ans: ["which", "that", "（省略）"], mode: "multi", exp: "先行詞が「物(the keys)」で、you lost (あなたが失くした) の目的語になる目的格の関係代名詞です。which, that、そして目的格は「省略」もできるため、3つとも正解です！" },
+        { ja: "彼女が着ているドレスが私は好きです。", q: "<span class='sentence-line'>I like the dress <span class='blank'>&nbsp;</span> she is wearing.</span>", choices: ["who", "which", "that", "（省略）"], ans: ["which", "that", "（省略）"], mode: "multi", exp: "先行詞が「物(the dress)」の目的格です。which, that、引いては目的格特有の「省略」の3つが正解となります。" },
+        { ja: "あなたがこれから見に行く映画の名前は何ですか？", q: "<span class='sentence-line'>What's the name of the film <span class='blank'>&nbsp;</span> you are going to see?</span>", choices: ["who", "which", "that", "（省略）"], ans: ["which", "that", "（省略）"], mode: "multi", exp: "先行詞が「映画・物(the film)」の目的格です。答えは which, that, （省略） の3つになります。" },
+        { ja: "私たちが訪れたかった美術館は、そこに着いたとき閉まっていました。", q: "<span class='sentence-line'>The museum <span class='blank'>&nbsp;</span> we wanted to visit was shut when we got there.</span>", choices: ["who", "which", "that", "（省略）"], ans: ["which", "that", "（省略）"], mode: "multi", exp: "先行詞は「美術館・物(The museum)」で、we wanted to visitの目的語です。which, that, （省略） がすべて使えます。" },
+        { ja: "あなたがパーティーに招待した人たちのうち、何人かは来られませんでした。", q: "<span class='sentence-line'>Some of the people <span class='blank'>&nbsp;</span> you invited couldn't come.</span>", choices: ["who", "whom", "which", "that", "（省略）"], ans: ["who", "whom", "that", "（省略）"], mode: "multi", exp: "先行詞が「人(the people)」の目的格です。くだけた会話ではwho、かたい表現ではwhomが使われ、thatや「省略」も可能です。なんと4つも正解があります！" },
+        { ja: "あなたがしなければならなかった仕事は終わりましたか？", q: "<span class='sentence-line'>Have you finished the work <span class='blank'>&nbsp;</span> you had to do?</span>", choices: ["who", "which", "that", "（省略）"], ans: ["which", "that", "（省略）"], mode: "multi", exp: "先行詞が「仕事・物(the work)」の目的格です。which, that, （省略） が正解です。" },
+        { ja: "あなたが借りた車は、数マイル走ったあとで故障しました。", q: "<span class='sentence-line'>The car <span class='blank'>&nbsp;</span> you rented broke down after a few miles.</span>", choices: ["who", "which", "that", "（省略）"], ans: ["which", "that", "（省略）"], mode: "multi", exp: "先行詞が「車・物(The car)」で、you rentedの目的語になっています。which, that, （省略） が正解です。" },
+        { ja: "トムが昨日お祭りで会った女の子は、私のクラスメイトです。", q: "<span class='sentence-line'>The girl <span class='blank'>&nbsp;</span> Tom met at the festival yesterday is my classmate.</span>", choices: ["who", "whom", "which", "that", "（省略）"], ans: ["who", "whom", "that", "（省略）"], mode: "multi", exp: "先行詞が「人(The girl)」で、Tom metの目的語になる目的格です。who, whom, that, （省略） の4つがすべて文法的に正しいです。" },
+        { ja: "これは私が今まで読んだ中で最もおもしろい本です。", q: "<span class='sentence-line'>This is the most interesting book <span class='blank'>&nbsp;</span> I have ever read.</span>", choices: ["who", "which", "that", "（省略）"], ans: ["which", "that", "（省略）"], mode: "multi", exp: "先行詞が「物(book)」の目的格なので、which, that, （省略） が正解です。" },
+        { ja: "彼が先週電話した男性は、親切に道を教えてくれました。", q: "<span class='sentence-line'>The man <span class='blank'>&nbsp;</span> he called last week told him the way kindly.</span>", choices: ["who", "whom", "which", "that", "（省略）"], ans: ["who", "whom", "that", "（省略）"], mode: "multi", exp: "先行詞が「人(The man)」で、he calledの目的語になる目的格です。who, whom, that, （省略） が正解になります。" }
+    ],
+    3: [
+        { ja: "隣に住んでいる女性は医者です。", q: "<span class='sentence-line'>The woman lives next door is a doctor.</span>", choices: ["OK", "❌"], ans: ["❌"], mode: "single", exp: "【解説】間違っている文です。動詞(lives)の前に主格の関係代名詞(who や that)が必要です。正しくは 'The woman who lives next door is a doctor.' となります。" },
+        { ja: "あなたが失くした鍵は見つかりましたか？", q: "<span class='sentence-line'>Have you found the keys you lost?</span>", choices: ["OK", "❌"], ans: ["OK"], mode: "single", exp: "【解説】正しい文です！ keysの後に目的格の関係代名詞(which/that)が省略されていますが、目的格の省略は完全にOKです。" },
+        { ja: "私たちが昨夜会った人たちは、とても親切でした。", q: "<span class='sentence-line'>The people we met last night were very nice.</span>", choices: ["OK", "❌"], ans: ["OK"], mode: "single", exp: "【解説】正しい文です！ peopleの後に目的格の関係代名詞が省略されていますが、問題ありません。" },
+        { ja: "そのオフィスで働いている人たちはとても親切です。", q: "<span class='sentence-line'>The people work in the office are very nice.</span>", choices: ["OK", "❌"], ans: ["❌"], mode: "single", exp: "【解説】間違っている文です。後ろの動詞(work)に対する主格の関係代名詞(who や that)が抜けています。省略してはいけません。正しくは 'The people who work...' となります。" },
+        { ja: "私が一緒に働いている人たちはとても親切です。", q: "<span class='sentence-line'>The people I work with are very nice.</span>", choices: ["OK", "❌"], ans: ["OK"], mode: "single", exp: "【解説】正しい文です！ work withの後に続く目的格が省略された、ナチュラルで正しい英文です。" }
+    ],
+    4: [
+        { ja: "私が持っていたすべてのお金を彼女にあげました。", q: "<span class='sentence-line'>I gave her all the money <span class='blank'>&nbsp;</span> I had.</span>", choices: ["that", "what"], ans: ["that"], mode: "single", exp: "【解説】先行詞に 'all the 〜' が含まれる場合は that を使うのが一般的です。whatの前に先行詞を置くことはできません。" },
+        { ja: "彼らが言ったことが聞こえましたか？", q: "<span class='sentence-line'>Did you hear <span class='blank'>&nbsp;</span> they said?</span>", choices: ["that", "what"], ans: ["what"], mode: "single", exp: "【解説】「彼らが言ったこと」という意味のカタマリを作ります。関係代名詞の what は $what = the\ thing\ which$ (〜なこと・もの) という意味を含んでいるため、前に先行詞がありません。" },
+        { ja: "彼らは子供たちが欲しがるものは何でも与えます。", q: "<span class='sentence-line'>They give their children everything <span class='blank'>&nbsp;</span> they want.</span>", choices: ["that", "what"], ans: ["that"], mode: "single", exp: "【解説】everythingという先行詞が前に堂々とあるので、先行詞を含まないwhatを入れるのはバツです。先行詞を修飾するthatが正解！" },
+        { ja: "あなたが欲しいものを教えてくれれば、取ってきてあげますよ。", q: "<span class='sentence-line'>Tell me <span class='blank'>&nbsp;</span> you want and I'll try to get it for you.</span>", choices: ["that", "what"], ans: ["what"], mode: "single", exp: "【解説】「あなたが欲しいこと・もの」という意味にします。$what = the\ thing\ which$ なので、前に名詞の先行詞がないときは what がピッタリとはまります。" },
+        { ja: "なぜあなたは、悪くなるすべてのことを私のせいにするのですか？", q: "<span class='sentence-line'>Why do you blame me for everything <span class='blank'>&nbsp;</span> goes wrong?</span>", choices: ["that", "what"], ans: ["that"], mode: "single", exp: "【解説】everything という先行詞がすでに存在しているため、that が正解です！" },
+        { ja: "多くはできませんが、私にできることは何でもします。", q: "<span class='sentence-line'>I won't be able to do much, but I'll do <span class='blank'>&nbsp;</span> I can.</span>", choices: ["that", "what"], ans: ["what"], mode: "single", exp: "【解説】doの直後に先行詞がありません。「私ができること（＝ $the\ thing\ which\ I\ can$）」という意味を表す what が正解です。" },
+        { ja: "多くはできませんが、私にできる最善のことをします。", q: "<span class='sentence-line'>I won't be able to do much, but I'll do the best <span class='blank'>&nbsp;</span> I can.</span>", choices: ["that", "what"], ans: ["that"], mode: "single", exp: "【解説】今度は直前に the best という立派な先行詞があるので、what ではなく that が正解になります！" },
+        { ja: "あなたがたった今言ったことには賛成できません。", q: "<span class='sentence-line'>I don't agree with <span class='blank'>&nbsp;</span> you've just said.</span>", choices: ["that", "what"], ans: ["what"], mode: "single", exp: "【解説】withの後ろに先行詞となる名詞がありません。「あなたが言ったこと（＝ $the\ thing\ which\ you\ have\ said$）」にするため what を使います。" },
+        { ja: "私は彼を信用していません。彼の言うことは何も信じません。", q: "<span class='sentence-line'>I don't trust him. I don't believe anything <span class='blank'>&nbsp;</span> he says.</span>", choices: ["that", "what"], ans: ["that"], mode: "single", exp: "【解説】anything という先行詞があるため、迷わず that を選びましょう。" },
+        { ja: "昨日起きたことは本当に驚きでした。", q: "<span class='sentence-line'><span class='blank'>&nbsp;</span> happened yesterday was a big surprise.</span>", choices: ["that", "what"], ans: ["what"], mode: "single", exp: "【解説】文の主語として「昨日起きたこと（＝ $the\ thing\ which\ happened$）」というカタマリを作るので、先行詞不要の what が正解です。" }
+    ],
+    5: [
+        { ja: "アンナは、とても楽しんでいるという新しい仕事について私に話してくれた。", q: "<span class='sentence-line'>Anna told me about her new job<span class='blank'>&nbsp;</span> she's enjoying very much.</span>", choices: [", which", ", that", "that", ", who"], ans: [", which"], mode: "single", exp: "【解説】her new job（彼女の新しい仕事）は特定の1つを指すため、カンマを打って補足説明をします。なお、カンマの直後には that を使うことができないルールなので , which が正解です。" },
+        { ja: "私のオフィスは2階にあるのですが、とても狭いです。", q: "<span class='sentence-line'>My office<span class='blank'>&nbsp;</span> is on the second floor, is very small.</span>", choices: [", which", ", that", "which", ", who"], ans: [", which"], mode: "single", exp: "【解説】My officeはすでに特定されているので、カンマで挟んで説明を足します。物は対象なので , which です。" },
+        { ja: "私が今使っているオフィスはとても狭いです。", q: "<span class='sentence-line'>The office<span class='blank'>&nbsp;</span> I'm using at the moment is very small.</span>", choices: [", which", "（省略）", ", that", ", who"], ans: ["（省略）"], mode: "single", exp: "【解説】「世の中にたくさんあるオフィスの中で、私が今使っているやつ」と限定しているので、カンマによる補足ではなく、通常の目的格の省略（またはカンマなしの which / that ）が正解です！" },
+        { ja: "マークの父親は、かつて軍隊にいたのですが、今はテレビ会社で働いています。", q: "<span class='sentence-line'>Mark's father<span class='blank'>&nbsp;</span> used to be in the army, now works for a TV company.</span>", choices: [", who", ", that", "who", ", which"], ans: [", who"], mode: "single", exp: "【解説】Mark's fatherという特定の「人」に対する補足説明なので、カンマ＋whoの「, who」が正解です！カンマの後ろに that は置けません。" },
+        { ja: "私を診察してくれたその医者は、何も悪いところを見つけられなかった。", q: "<span class='sentence-line'>The doctor<span class='blank'>&nbsp;</span> examined me couldn't find anything wrong.</span>", choices: [", who", "who", ", that", ", which"], ans: ["who"], mode: "single", exp: "【解説】「私を診察した、その医者」と限定する使い方なので、カンマのない普通の主格関係代名詞 who が正解です。" },
+        { ja: "太陽は宇宙にある何百万もの星の1つですが、私たちに熱と光を与えてくれます。", q: "<span class='sentence-line'>The sun<span class='blank'>&nbsp;</span> is one of millions of stars in the universe, provides us with heat.</span>", choices: [", which", ", that", "which", ", who"], ans: [", which"], mode: "single", exp: "【解説】太陽(The sun)はこの世に1つしかない特別な名詞なので、カンマ付きの , which で補足します。" },
+        { ja: "ケンは私に手紙をくれたのですが、それはとても親切な内容でした。", q: "<span class='sentence-line'>Ken gave me a letter<span class='blank'>&nbsp;</span> was very kind of him.</span>", choices: [", which", ", that", "which", ", who"], ans: [", which"], mode: "single", exp: "【解説】「手紙をくれた、そのこと自体が親切だ」という、前の文全体や内容を補足するカンマ付きの , which です。" },
+        { ja: "私の姉はパリに住んでいるのですが、来週日本に来る予定です。", q: "<span class='sentence-line'>My sister<span class='blank'>&nbsp;</span> lives in Paris, is coming to Japan next week.</span>", choices: [", who", ", that", "who", ", which"], ans: [", who"], mode: "single", exp: "【解説】My sisterという特定の「人」に説明を加えるので , who が正解です。" },
+        { ja: "私たちはそのホテルに泊まりましたが、そこは友達が勧めてくれた場所でした。", q: "<span class='sentence-line'>We stayed at the hotel<span class='blank'>&nbsp;</span> my friend recommended.</span>", choices: ["which", ", which", ", that", ", who"], ans: ["which"], mode: "single", exp: "【解説】「友達が勧めてくれた、あのホテル」と限定しているので、カンマなしの which (またはthat / 省略)が正解です。" },
+        { ja: "彼女は車を売ったのですが、それは賢い選択でした。", q: "<span class='sentence-line'>She sold her car<span class='blank'>&nbsp;</span> was a wise choice.</span>", choices: [", which", ", that", "which", ", who"], ans: [", which"], mode: "single", exp: "【解説】「車を売ったこと」という前の行動全体を補足する、カンマ＋which が正解です。" }
+    ],
+    6: [
+        { ja: "お母さんが推理小説を書いているという人に、パーティーで会いました。", q: "<span class='sentence-line'>I met somebody <span class='blank'>&nbsp;</span> mother writes detective stories.</span>", choices: ["who", "whose"], ans: ["whose"], mode: "single", exp: "【解説】「その人の(somebody's)お母さん」という所有の関係なので、所有格の whose が正解です！" },
+        { ja: "奥さんが英語の先生だという男性に会いました。", q: "<span class='sentence-line'>I met a man <span class='blank'>&nbsp;</span> wife is an English teacher.</span>", choices: ["who", "whose"], ans: ["whose"], mode: "single", exp: "【解説】「その男性の(a man's)奥さん」という所有のつながりなので whose を使います。" },
+        { ja: "レストランを経営しているという女性に会いました。", q: "<span class='sentence-line'>I met a woman <span class='blank'>&nbsp;</span> owns a restaurant.</span>", choices: ["who", "whose"], ans: ["who"], mode: "single", exp: "【解説】空欄の後ろがすぐ動詞(owns)になっています。「その女性が経営している」という主格の関係なので、who が正解です！" },
+        { ja: "エベレストに登るのが夢だという人に会いました。", q: "<span class='sentence-line'>I met somebody <span class='blank'>&nbsp;</span> ambition is to climb Everest.</span>", choices: ["who", "whose"], ans: ["whose"], mode: "single", exp: "【解説】「その人の(somebody's)野望・夢」という名詞にかかるため、所有格の whose が正解です。" },
+        { ja: "私たちは、結婚したばかりだというカップルに会いました。", q: "<span class='sentence-line'>We met a couple <span class='blank'>&nbsp;</span> had just got married.</span>", choices: ["who", "whose"], ans: ["who"], mode: "single", exp: "【解説】後ろに動詞(had)が続いているので、主語の役割をする主格の who が正解になります。" },
+        { ja: "両親がサーカスで働いていたという人に会いました。", q: "<span class='sentence-line'>I met somebody <span class='blank'>&nbsp;</span> parents used to work in a circus.</span>", choices: ["who", "whose"], ans: ["whose"], mode: "single", exp: "【解説】「その人の(somebody's)両親」という所有の関係を示すため whose が正解です。" },
+        { ja: "流暢な英語を話す少年が私の前に立っていました。", q: "<span class='sentence-line'>A boy <span class='blank'>&nbsp;</span> spoke fluent English stood in front of me.</span>", choices: ["who", "whose"], ans: ["who"], mode: "single", exp: "【解説】後ろに動詞(spoke)があるので、主格の who が正解です。" },
+        { ja: "私は車が故障してしまった男性を助けました。", q: "<span class='sentence-line'>I helped a man <span class='blank'>&nbsp;</span> car had broken down.</span>", choices: ["who", "whose"], ans: ["whose"], mode: "single", exp: "【解説】「その男性の(a man's)車」という所有格の形にするため whose が正解です。" },
+        { ja: "窓が割れているあの家を見てごらんなさい。", q: "<span class='sentence-line'>Look at that house <span class='blank'>&nbsp;</span> windows are broken.</span>", choices: ["who", "whose"], ans: ["whose"], mode: "single", exp: "【解説】面白いポイント！ whose は「人」だけでなく、「家(that house's)」のような【物】の所有格としても使うことができる超便利な関係代名詞なんです！" },
+        { ja: "私たちは昨日、新しい家を買ったばかりの家族を訪問しました。", q: "<span class='sentence-line'>We visited a family <span class='blank'>&nbsp;</span> had just bought a new house.</span>", choices: ["who", "whose"], ans: ["who"], mode: "single", exp: "【解説】後ろに動詞(had)が続いているので、主格の who が正解です。" }
+    ]
+};
+
+let currentSection = 1;
+let currentIdx = 0;
+let selectedChoices = [];
+
+function switchSection(sectionNum) {
+    currentSection = sectionNum;
+    currentIdx = 0;
+    
+    // 全タブのアクティブクラスをリセット
+    for(let i=1; i<=6; i++) {
+        document.getElementById(`tab${i}`).classList.remove('active');
+    }
+    document.getElementById(`tab${sectionNum}`).classList.add('active');
+    
+    loadQuestion();
+}
+
+function loadQuestion() {
+    const data = quizSections[currentSection][currentIdx];
+    document.getElementById('progress').textContent = `Section ${currentSection} - Problem ${currentIdx + 1} / ${quizSections[currentSection].length}`;
+    document.getElementById('nextBtn').style.display = "none";
+    document.getElementById('submitBtn').style.display = "inline-block";
+    document.getElementById('explanation').style.display = "none";
+    
+    // セクションに応じた案内文の切り替え
+    const guide = document.getElementById('guideText');
+    if (data.mode === "multi") {
+        guide.textContent = "※あてはまるものを【すべて】選んでから、下のAnswerボタンを押してね！(複数正解あり)";
+    } else {
+        guide.textContent = "※正しい答えを1つ選んで、下のAnswerボタンを押してね！";
+    }
+
+    const qBox = document.getElementById('questionText');
+    qBox.innerHTML = data.q;
+
+    selectedChoices = [];
+    const interaction = document.getElementById('interactionArea');
+    interaction.innerHTML = "";
+    
+    data.choices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.className = "btn";
+        btn.textContent = choice;
+        btn.onclick = () => toggleChoice(btn, choice, data.mode);
+        interaction.appendChild(btn);
+    });
+}
+
+function toggleChoice(btn, choice, mode) {
+    if (document.getElementById('nextBtn').style.display === "block") return;
+
+    if (mode === "single") {
+        // 単一選択モードの場合は他の選択をクリア
+        document.querySelectorAll('.btn').forEach(b => b.classList.remove('selected'));
+        selectedChoices = [choice];
+        btn.classList.add('selected');
+    } else {
+        // 複数選択モード
+        const idx = selectedChoices.indexOf(choice);
+        if (idx > -1) {
+            selectedChoices.splice(idx, 1);
+            btn.classList.remove('selected');
+        } else {
+            selectedChoices.push(choice);
+            btn.classList.add('selected');
+        }
+    }
+}
+
+function checkMultipleAnswers() {
+    const data = quizSections[currentSection][currentIdx];
+    const explanation = document.getElementById('explanation');
+    
+    const sortedSelected = [...selectedChoices].sort();
+    const sortedAnswers = [...data.ans].sort();
+    
+    const isCorrect = sortedSelected.length === sortedAnswers.length && 
+                      sortedSelected.every((val, index) => val === sortedAnswers[index]);
+
+    if (isCorrect) {
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#16a085', '#2c3e50'] });
+        
+        const blankSpans = document.querySelectorAll('.question-box .blank');
+        blankSpans.forEach(span => {
+            span.textContent = data.ans.join(' / ');
+            span.style.padding = "0 15px";
+        });
+
+        explanation.innerHTML = `<span class="translation-text">【和訳】${data.ja}</span><strong>正解：</strong> ${data.ans.join(', ')}<br><br>${data.exp}`;
+        explanation.style.display = "block";
+        document.getElementById('nextBtn').style.display = "block";
+        document.getElementById('submitBtn').style.display = "none";
+    } else {
+        alert(data.mode === "multi" ? "Try again! 正解が複数あるかもしれません。すべての正しい組み合わせを選べているか見直そう！" : "Try again! もう一度文脈をよく読み直してみよう。");
+    }
+}
+
+function nextQuestion() {
+    currentIdx++;
+    if (currentIdx < quizSections[currentSection].length) {
+        loadQuestion();
+    } else {
+        alert(`素晴らしい！Section ${currentSection} のすべての問題が完了しました！`);
+        currentIdx = 0;
+        loadQuestion();
+    }
+}
+
+function generateWorksheet() {
+    for (let secNum = 1; secNum <= 6; secNum++) {
+        const ws = document.getElementById(`ws-content-${secNum}`);
+        ws.innerHTML = "";
+        
+        quizSections[secNum].forEach((item, i) => {
+            const div = document.createElement('div');
+            div.className = 'print-q';
+            
+            let displayEn = item.q.replace(/<span class='blank'.*?<\/span>/g, " _____________________ ");
+            const printChoices = item.choices.map((c, idx) => `(${idx + 1}) ${c}`).join(" &nbsp;&nbsp;&nbsp;&nbsp; ");
+            
+            div.innerHTML = `
+                <div class="print-en"><b>Q${i + 1}.</b> 【和訳】${item.ja}<br>${displayEn}</div>
+                <div class="print-choices">選択肢: ${printChoices}</div>
+            `;
+            ws.appendChild(div);
+        });
+    }
+}
+
+window.onload = () => {
+    generateWorksheet();
+    loadQuestion();
+};
+</script>
+</body>
+</html>
