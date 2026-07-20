@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>21章 関係詞②</title>
+    <link href="https://fonts.googleapis.com/css2?family=Andika&family=Kosugi+Maru&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --blue: #2980b9; 
+            --dark: #2c3e50; 
+            --success: #27ae60;
+            --font-main: 'Andika', 'Kosugi Maru', sans-serif; 
+        }
+
+        /* ==========================================
+           1. 画面表示用（オンラインアクティビティ）スタイル
+           ========================================== */
+        body { 
+            font-family: var(--font-main); 
+            background: #f4f6f9; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 20px; 
+            margin: 0;
+        }
+        .container { 
+            background: white; 
+            width: 95%; 
+            max-width: 950px; 
+            padding: 35px; 
+            border-radius: 20px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.06); 
+            border-top: 8px solid var(--blue); 
+            text-align: center; 
+            position: relative;
+            margin-top: 20px;
+        }
+        .sub-title-corner {
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            font-weight: bold;
+        }
+        .tab-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+            margin-top: 10px;
+        }
+        .tab-btn {
+            padding: 10px 24px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-family: inherit;
+            font-weight: bold;
+            color: #7f8c8d;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background: var(--blue);
+            color: white;
+            border-color: var(--blue);
+        }
+        .progress-bar { 
+            font-size: 0.95rem; 
+            color: #7f8c8d; 
+            margin-bottom: 15px; 
+            font-weight: bold;
+        }
+        .question-box { 
+            font-size: 1.35rem; 
+            margin-bottom: 25px; 
+            padding: 25px; 
+            background: #f8fbfe; 
+            border-radius: 10px; 
+            border: 1px solid #e1e8ed; 
+            line-height: 1.8; 
+            text-align: left; 
+        }
+        .blank { 
+            display: inline-block;
+            border-bottom: 2px solid var(--blue); 
+            color: var(--blue); 
+            min-width: 120px; 
+            text-align: center;
+            font-weight: bold;
+            margin: 0 5px;
+        }
+        
+        .btn-container { 
+            display: flex; 
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px; 
+            margin-top: 10px; 
+            width: 100%;
+        }
+        
+        .btn-inline {
+            flex: 1;
+            min-width: 160px;
+            max-width: 210px;
+            padding: 14px 10px;
+            text-align: center;
+        }
+
+        .btn-block {
+            width: 100%;
+            max-width: 750px;
+            text-align: left;
+            padding: 12px 20px;
+        }
+
+        .btn { 
+            border: 2px solid #ddd; 
+            border-radius: 8px; 
+            background: white; 
+            cursor: pointer; 
+            font-size: 1.1rem; 
+            font-family: inherit; 
+            transition: all 0.2s; 
+        }
+        .btn:hover { 
+            border-color: var(--blue); 
+            background: #edf7fd; 
+        }
+        .btn.selected {
+            background: var(--blue);
+            color: white;
+            border-color: var(--blue);
+        }
+        .explanation { 
+            background: #f4f9fc; 
+            padding: 20px; 
+            border-radius: 10px; 
+            margin-top: 25px; 
+            text-align: left; 
+            font-size: 1.05rem; 
+            display: none; 
+            border-left: 5px solid var(--blue); 
+            line-height: 1.6; 
+        }
+        .translation-text {
+            font-weight: bold;
+            color: var(--blue);
+            display: block;
+            margin-bottom: 8px;
+        }
+        .next-btn { 
+            display: none; 
+            background: var(--dark); 
+            color: white; 
+            border: none; 
+            padding: 12px 40px; 
+            border-radius: 25px; 
+            font-size: 1.2rem; 
+            cursor: pointer; 
+            margin: 20px auto 0; 
+        }
+        .next-btn:hover { opacity: 0.9; }
+
+        .toast {
+            position: fixed;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(39, 174, 96, 0.95);
+            color: white;
+            padding: 20px 50px;
+            border-radius: 50px;
+            font-size: 2rem;
+            font-weight: bold;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+            z-index: 9999;
+        }
+        .toast.show { opacity: 1; }
+
+        .print-only { display: none; }
+
+        /* ==========================================
+           2. 印刷用（Command + P）スタイル
+           ========================================== */
+        @media print {
+            .container, .toast { display: none !important; }
+            .print-only { display: block !important; width: 100%; }
+            body { background: white; padding: 0; margin: 0; color: black; display: block; }
+            @page { size: A4; margin: 15mm 15mm; }
+            
+            .print-header { border-bottom: 2px solid #2980b9; padding-bottom: 8px; margin-bottom: 20px; }
+            .print-title { font-size: 18pt; font-weight: bold; margin: 0; }
+            .print-section-title { font-size: 12pt; font-weight: bold; color: #2980b9; margin-top: 25px; margin-bottom: 10px; page-break-after: avoid; }
+            .print-instruction { font-size: 9.5pt; color: #555; background: #f5f7fa; padding: 6px 10px; border-radius: 4px; margin-bottom: 12px; }
+            .print-q-item { margin-bottom: 16px; page-break-inside: avoid; padding-bottom: 10px; border-bottom: 1px dashed #e1e8ed; }
+            .print-ja { font-size: 9.5pt; color: #555; }
+            .print-en { font-family: 'Times New Roman', serif; font-size: 12pt; color: #000; margin: 4px 0; }
+            .print-blank-space { display: inline-block; width: 100px; border-bottom: 1px solid #000; margin: 0 4px; }
+            
+            .print-choices-inline { font-size: 11pt; padding-left: 10px; font-family: 'Times New Roman', serif; margin-top: 4px; }
+            .print-choice-inline { display: inline-block; width: 22%; }
+            
+            .print-choices-block { font-size: 10.5pt; padding-left: 10px; font-family: 'Times New Roman', serif; margin-top: 4px; }
+            .print-choice-block { display: block; margin-top: 3px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="toast" class="toast">Correct! ✨</div>
+
+<!-- オンラインアクティビティ画面 -->
+<div class="container">
+    <div class="sub-title-corner">21章 関係詞②</div>
+    
+    <div class="tab-container">
+        <button id="tab1" class="tab-btn active" onclick="switchSection(1)">Section 1 (関係詞の使い分け：12問)</button>
+        <button id="tab2" class="tab-btn" onclick="switchSection(2)">Section 2 (正誤判定と修正：12問)</button>
+    </div>
+
+    <div id="progress" class="progress-bar"></div>
+    <div id="questionContainer"><div id="questionText" class="question-box"></div></div>
+    <div id="interactionArea" class="btn-container"></div>
+    <div id="explanation" class="explanation"></div>
+    <button id="nextBtn" class="next-btn" onclick="nextQuestion()">Next →</button>
+</div>
+
+<!-- 印刷用ワークシート画面（Command+Pで自動展開） -->
+<div class="print-only">
+    <div class="print-header">
+        <div class="print-title">第21章 関係詞② ワークシート</div>
+        <div style="font-size:10pt; color:#7f8c8d;">テーマ：関係副詞 / 前置詞＋関係代名詞 / 非制限用法 / 先行詞の省略判定</div>
+    </div>
+    <div id="print-content"></div>
+</div>
+
+<script>
+// マスターデータ定義
+const masterQuizData = {
+    1: [
+        { ja: "私がノートパソコンを借りた同僚はとても親切でした。", q: "The colleague <span class='blank'>&nbsp;</span> laptop I borrowed was very kind.", rawChoices: ["who", "whom", "whose", "where"], rawAns: "whose", type: "inline", exp: "「その同僚のノートパソコン」という所有の関係を示すため、whoseが正解です。" },
+        { ja: "水族館とは、海の生き物が飼育され展示される場所です。", q: "An aquarium is a place <span class='blank'>&nbsp;</span> marine animals are kept and displayed.", rawChoices: ["who", "whom", "whose", "where"], rawAns: "where", type: "inline", exp: "先行詞が場所（a place）で、後ろが完全文なので、関係副詞whereが適切です。" },
+        { ja: "私が育った京都は、日本の古い都です。(非制限用法)", q: "Kyoto, <span class='blank'>&nbsp;</span> I grew up, is an old capital of Japan.", rawChoices: ["which", "where", "that", "when"], rawAns: "where", type: "inline", exp: "先行詞が固有名詞（Kyoto）であり、カンマの後ろに関係副詞whereを用います（カンマの直後にthatは使えません）。" },
+        { ja: "ボランティアとは、報酬なしで他人を助ける人のことです。", q: "A volunteer is a person <span class='blank'>&nbsp;</span> helps others without receiving payment.", rawChoices: ["who", "whom", "whose", "where"], rawAns: "who", type: "inline", exp: "後ろに動詞helpsが続く主格の役割なので、人を修飾する関係代名詞whoが正解です。" },
+        { ja: "私たちが先週末にキャンプを楽しんだ森はとても静かでした。", q: "The forest <span class='blank'>&nbsp;</span> we enjoyed camping last weekend was very peaceful.", rawChoices: ["who", "whom", "whose", "where"], rawAns: "where", type: "inline", exp: "先行詞 forest（場所）に対し、後ろに完全文が続いているため関係副詞whereが正解です。" },
+        { ja: "あなたが昨日一緒にダンスをした男性の名前を教えてくれますか？", q: "Can you tell me the name of the man with <span class='blank'>&nbsp;</span> you danced yesterday?", rawChoices: ["who", "whom", "whose", "where"], rawAns: "whom", type: "inline", exp: "前置詞 with の後ろに関係代名詞を置く場合、目的格の whom を使うのが文法のルールです。" },
+        { ja: "これが、私たちがプロジェクトについて議論したミーティングルームです。", q: "This is the meeting room in <span class='blank'>&nbsp;</span> we discussed the new project.", rawChoices: ["who", "whom", "which", "where"], rawAns: "which", type: "inline", exp: "前置詞 in の後ろに場所の名詞を受けるため、関係代名詞の which が正解です（in which ＝ where）。" },
+        { ja: "多くの花が咲く春は、私の一番好きな季節です。(非制限用法)", q: "Spring, <span class='blank'>&nbsp;</span> many flowers bloom, is my favorite season.", rawChoices: ["which", "where", "when", "why"], rawAns: "when", type: "inline", exp: "固有名詞的な季節（Spring）に対し、カンマを使って補足説明をするため、関係副詞whenが正解です。" },
+        { ja: "これが、彼女がわずか3ヶ月で英語をマスターした方法です。", q: "This is <span class='blank'>&nbsp;</span> she mastered English in just three months.", rawChoices: ["when", "where", "why", "how"], rawAns: "how", type: "inline", exp: "先行詞を伴わず、単独で「〜する方法・やり方」を表す関係副詞 how が適切です。" },
+        { ja: "彼が突然チームを辞めた理由を誰も知らない。", q: "Nobody knows the reason <span class='blank'>&nbsp;</span> he suddenly left the team.", rawChoices: ["when", "where", "why", "how"], rawAns: "why", type: "inline", exp: "先行詞が the reason なので、理由の関係副詞 why がベストです。" },
+        { ja: "【先行詞の省略】これが私の生まれ育った場所です。", q: "This is <span class='blank'>&nbsp;</span> I was born and raised.", rawChoices: ["when", "where", "why", "how"], rawAns: "where", type: "inline", exp: "the place などの一般的な先行詞は省略されることがあります。where単独で名詞のカタマリを作ることができます。" },
+        { ja: "【先行詞の省略】7月は、この町が多くの観光客で賑わう時期です。", q: "July is <span class='blank'>&nbsp;</span> this town becomes crowded with many tourists.", rawChoices: ["when", "where", "why", "how"], rawAns: "when", type: "inline", exp: "the time などの先行詞が省略された形です。when単独で「〜する時期」という意味になります。" }
+    ],
+    2: [
+        { ja: "This is the way how I practice the piano. この文の判定として正しいものはどれですか？", q: "This is the way how I practice the piano.", rawChoices: ["正しい文である", "誤り。how を in which に変えるべき（またはhowを削除）", "誤り。how を why に変えるべき", "誤り。how を where に変えるべき"], rawAns: "誤り。how を in which に変えるべき（またはhowを削除）", type: "block", exp: "the way と how は同時に使えません。the way in which とするか、どちらか片方だけにします。" },
+        { ja: "I still remember the park where we played soccer. この文の判定は？", q: "I still remember the park where we played soccer.", rawChoices: ["正しい文である", "誤り。where を which に変えるべき", "誤り。where を when に変えるべき", "誤り。park を way に変えるべき"], rawAns: "正しい文である", type: "block", exp: "場所の先行詞 the park に対し、後ろが完全文なので関係副詞 where を用いた正しい文です。" },
+        { ja: "This is the museum where we visited two days ago. この文の判定は？", q: "This is the museum where we visited two days ago.", rawChoices: ["正しい文である", "誤り。where を which に変えるべき", "誤り。where を when に変えるべき", "誤り。where を how に変えるべき"], rawAns: "誤り。where を which に変えるべき", type: "block", exp: "visited は他動詞で、後ろに目的語が欠けている不完全文です。そのため、関係代名詞 which が必要です。" },
+        { ja: "Friday is the day why I feel most relaxed. この文の判定は？", q: "Friday is the day why I feel most relaxed.", rawChoices: ["正しい文である", "誤り。why を when に変えるべき", "誤り。why を where に変えるべき", "誤り。why を how に変えるべき"], rawAns: "誤り。why を when に変えるべき", type: "block", exp: "先行詞が the day なので、理由の why ではなく、時間の関係副詞 when を使います。" },
+        { ja: "I don't like how he treats his dog. この文の判定は？", q: "I don't like how he treats his dog.", rawChoices: ["正しい文である", "誤り。how を the way how に変えるべき", "誤り。how を in that に変えるべき", "誤り。how を why に変えるべき"], rawAns: "正しい文である", type: "block", exp: "the way を使わずに、関係副詞 how 単独で「彼の犬の扱い方」という意味を作っている正しい英文です。" },
+        { ja: "Please show me the way how you fixed this smartphone. この文の判定は？", q: "Please show me the way how you fixed this smartphone.", rawChoices: ["正しい文である", "誤り。how を in which に変えるか、howを消すべき", "誤り。the way を the reason に変えるべき", "誤り。how を to whom に変えるべき"], rawAns: "誤り。how を in which に変えるか、howを消すべき", type: "block", exp: "the way how の併用は不可です。'the way you fixed' か 'how you fixed' に修正します。" },
+        { ja: "Ken loves the laboratory where he studies chemistry. この文の判定は？", q: "Ken loves the laboratory where he studies chemistry.", rawChoices: ["正しい文である", "誤り。where を which に変えるべき", "誤り. where を when に変えるべき", "誤り。where を how に変えるべき"], rawAns: "正しい文である", type: "block", exp: "he studies chemistry は完全文であり、場所の研究室を修飾しているので where で正しいです。" },
+        { ja: "I will never forget the day how we won the game. この文の判定は？", q: "I will never forget the day how we won the game.", rawChoices: ["正しい文である", "誤り。how を when (自然には on which) に変えるべき", "誤り。how を where に変えるべき", "誤り。how を why に変えるべき"], rawAns: "誤り。how を when (自然には on which) に変えるべき", type: "block", exp: "先行詞が the day（日）なので、方法の how ではなく when や on which を使う必要があります。" },
+        { ja: "Spring is the season when the cherry blossoms open. この文の判定は？", q: "Spring is the season when the cherry blossoms open.", rawChoices: ["正しい文である", "誤り。when を which に変えるべき", "誤り。when を where に変えるべき", "誤り。when を how に変えるべき"], rawAns: "正しい文である", type: "block", exp: "先行詞が the season（季節・時間）で、後ろも完全文なので、関係副詞 when で完璧に正しい文です。" },
+        { ja: "Can you explain the reason how you were late? この文の判定は？", q: "Can you explain the reason how you were late?", rawChoices: ["正しい文である", "誤り。how を why (または for which) に変えるべき", "誤り。how を where に変えるべき", "誤り。reason を way に変えるべき"], rawAns: "誤り。how を why (または for which) に変えるべき", type: "block", exp: "先行詞が the reason（理由）なので、関係副詞は how ではなく why を使用します。" },
+        { ja: "【正誤判定】February is when the snow is heaviest. この文の判定は？", q: "February is when the snow is heaviest.", rawChoices: ["正しい文である（the monthが省略されている）", "誤り。when の前に the month が絶対に必要である", "誤り。when を which に変えるべき", "誤り。when を where に変えるべき"], rawAns: "正しい文である（the monthが省略されている）", type: "block", exp: "先行詞の the month が省略された形です。when 単独で名詞節を作れるため正しい英文です。" },
+        { ja: "【正誤判定】This cafe is where I usually study English. この文の判定 is ？", q: "This cafe is where I usually study English.", rawChoices: ["正しい文である（the placeが省略されている）", "誤り。where の前に the place が絶対に必要である", "誤り。where を which に変えるべき", "誤り。where を when に変えるべき"], rawAns: "正しい文である（the placeが省略されている）", type: "block", exp: "先行詞 the place が省略された正しい英文です。where単独で補語（C）のカタマリを作っています。" }
+    ]
+};
+
+let activeQuizData = { 1: [], 2: [] };
+let currentSection = 1;
+let currentIdx = 0;
+
+function shuffleArray(array) {
+    const newArr = [...array];
+    for (let i = newArr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+    }
+    return newArr;
+}
+
+function initOnlineQuestions() {
+    activeQuizData[1] = shuffleArray(masterQuizData[1]);
+    activeQuizData[2] = shuffleArray(masterQuizData[2]);
+}
+
+function switchSection(sectionNum) {
+    currentSection = sectionNum;
+    currentIdx = 0;
+    document.getElementById('tab1').classList.remove('active');
+    document.getElementById('tab2').classList.remove('active');
+    document.getElementById(`tab${sectionNum}`).classList.add('active');
+    loadQuestion();
+}
+
+function loadQuestion() {
+    const data = activeQuizData[currentSection][currentIdx];
+    document.getElementById('progress').textContent = `Section ${currentSection} - 問題 ${currentIdx + 1} / ${activeQuizData[currentSection].length}`;
+    document.getElementById('nextBtn').style.display = "none";
+    document.getElementById('explanation').style.display = "none";
+    
+    const qBox = document.getElementById('questionText');
+    qBox.innerHTML = `<span class="translation-text">【和訳・状況】${data.ja}</span><br>${data.q}`;
+
+    const interaction = document.getElementById('interactionArea');
+    interaction.innerHTML = "";
+    
+    // オンライン画面：選択肢テキストをリアルタイムシャッフル
+    const shuffledTexts = shuffleArray(data.rawChoices);
+    const labels = ["(A)", "(B)", "(C)", "(D)"];
+    
+    shuffledTexts.forEach((text, i) => {
+        const fullChoiceText = `${labels[i]} ${text}`;
+        const btn = document.createElement('button');
+        btn.className = "btn " + (data.type === "inline" ? "btn-inline" : "btn-block");
+        btn.textContent = fullChoiceText;
+        
+        btn.onclick = () => checkAnswer(btn, text, data.rawAns, fullChoiceText);
+        interaction.appendChild(btn);
+    });
+}
+
+function checkAnswer(selectedBtn, selectedText, correctText, fullChoiceText) {
+    if (document.getElementById('nextBtn').style.display === "block") return;
+
+    const data = activeQuizData[currentSection][currentIdx];
+    const explanation = document.getElementById('explanation');
+    
+    if (selectedText === correctText) {
+        const toast = document.getElementById('toast');
+        toast.className = "toast show";
+        setTimeout(() => { toast.className = "toast"; }, 1200);
+
+        selectedBtn.classList.add('selected');
+        
+        const blankSpan = document.querySelector('.question-box .blank');
+        if (blankSpan) {
+            blankSpan.textContent = correctText;
+        }
+
+        explanation.innerHTML = `<strong>正解：</strong> ${fullChoiceText}<br><br>${data.exp}`;
+        explanation.style.display = "block";
+        document.getElementById('nextBtn').style.display = "block";
+    } else {
+        alert("Try again! もう一度よく考えて選んでみてね。");
+    }
+}
+
+function nextQuestion() {
+    currentIdx++;
+    if (currentIdx < activeQuizData[currentSection].length) {
+        loadQuestion();
+    } else {
+        alert(`素晴らしい！Section ${currentSection} をクリアしました！`);
+        currentIdx = 0;
+        if (currentSection === 1) activeQuizData[1] = shuffleArray(masterQuizData[1]);
+        if (currentSection === 2) activeQuizData[2] = shuffleArray(masterQuizData[2]);
+        loadQuestion();
+    }
+}
+
+// ==========================================
+// 【修正】印刷用ワークシートの動的生成ロジック
+// 出題順（Q1〜Q24）はマスターの美しさを保ち、選択肢（A〜D）の並び順だけをシャッフル！
+// ==========================================
+function generatePrintWorksheet() {
+    const printContent = document.getElementById('print-content');
+    printContent.innerHTML = ""; 
+
+    let html = "";
+    const labels = ["(A)", "(B)", "(C)", "(D)"];
+
+    // Section 1
+    html += `<div class="print-section-title">■ Section 1: 関係詞の使い分け問題（関係副詞・前置詞・非制限・先行詞省略ミックス）</div>`;
+    html += `<div class="print-instruction">【指示】空欄に当てはまる最も適切なものを1つ選びなさい。</div>`;
+    masterQuizData[1].forEach((item, index) => {
+        let printQ = item.q.replace("<span class='blank'>&nbsp;</span>", "<span class='print-blank-space'></span>");
+        
+        // 印刷時にも、選択肢のテキストを毎回ランダムにシャッフル！
+        const printShuffledChoices = shuffleArray(item.rawChoices);
+        
+        html += `
+            <div class="print-q-item">
+                <div class="print-ja">Q${index+1}. ${item.ja}</div>
+                <div class="print-en">${printQ}</div>
+                <div class="print-choices-inline">
+                    ${printShuffledChoices.map((c, i) => `<span class="print-choice-inline">${labels[i]} ${c}</span>`).join("")}
+                </div>
+            </div>`;
+    });
+
+    // Section 2
+    html += `<div class="print-section-title">■ Section 2: 英文の正誤判定と修正</div>`;
+    html += `<div class="print-instruction">【指示】提示された英文の文法的な正誤を判定し、間違っている場合は最も適切な修正選択肢を1つ選びなさい。</div>`;
+    
+    masterQuizData[2].forEach((item, index) => {
+        // 正誤判定文の選択肢（文章）も毎回ランダムにシャッフルして配置！
+        const printShuffledChoices = shuffleArray(item.rawChoices);
+        
+        html += `
+            <div class="print-q-item">
+                <div class="print-en"><b>Q${index+13}.</b> ${item.q}</div>
+                <div class="print-choices-block">
+                    ${printShuffledChoices.map((c, i) => `<span class="print-choice-block">${labels[i]} ${c}</span>`).join("")}
+                </div>
+            </div>`;
+    });
+
+    printContent.innerHTML = html;
+}
+
+window.onload = () => {
+    initOnlineQuestions();  
+    loadQuestion();         
+    generatePrintWorksheet(); // これでページをロード・更新するたびにPDFの正解位置もランダムに再生成されます！
+};
+</script>
+</body>
+</html>
