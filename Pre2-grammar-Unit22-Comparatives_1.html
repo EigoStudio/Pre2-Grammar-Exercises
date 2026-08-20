@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>22章 比較① - 英検準2級レベル問題集</title>
+    <link href="https://fonts.googleapis.com/css2?family=Andika&family=Kosugi+Maru&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root { 
+            --purple: #8e44ad; 
+            --purple-light: #f5edfa;
+            --dark: #2c3e50; 
+            --font-main: 'Andika', 'Kosugi Maru', sans-serif; 
+        }
+        body { 
+            font-family: var(--font-main); 
+            background: #f0f2f5; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 20px; 
+            margin: 0;
+        }
+        
+        .tab-container { 
+            display: flex; 
+            flex-wrap: wrap;
+            gap: 8px; 
+            margin-bottom: 20px; 
+            justify-content: center;
+            max-width: 950px;
+            width: 100%;
+        }
+        .tab { 
+            padding: 10px 16px; 
+            background: #e0e0e0; 
+            border-radius: 10px 10px 0 0; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 0.95rem;
+            color: #555;
+            transition: all 0.2s ease;
+        }
+        .tab:hover {
+            background: #d0d0d0;
+        }
+        .tab.active { 
+            background: var(--purple); 
+            color: white; 
+        }
+
+        .container { 
+            background: white; 
+            width: 95%; 
+            max-width: 900px; 
+            padding: 35px; 
+            border-radius: 20px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+            border-top: 8px solid var(--purple); 
+            text-align: center; 
+            box-sizing: border-box;
+        }
+        .question-box { 
+            font-size: 1.35rem; 
+            margin-bottom: 25px; 
+            padding: 25px; 
+            background: #fdfaff; 
+            border-radius: 12px; 
+            border: 1px solid #ebdcf5; 
+            line-height: 1.7; 
+            position: relative; 
+        }
+        .translation { 
+            font-size: 1.15rem; 
+            color: #444; 
+            margin-bottom: 12px; 
+            display: block; 
+            font-weight: bold; 
+        }
+        .blank { 
+            border-bottom: 2px solid var(--purple); 
+            color: var(--purple); 
+            font-weight: bold; 
+            padding: 0 10px; 
+        }
+        
+        .btn { 
+            padding: 12px 20px; 
+            border: 1px solid #ccc; 
+            border-radius: 8px; 
+            background: white; 
+            cursor: pointer; 
+            font-size: 1.1rem; 
+            font-family: inherit; 
+            margin: 6px; 
+            transition: 0.2s; 
+        }
+        .btn:hover { 
+            border-color: var(--purple); 
+            background: var(--purple-light); 
+        }
+        
+        .answer-area { 
+            min-height: 70px; 
+            border-bottom: 2px dashed var(--purple); 
+            margin: 20px 0; 
+            display: flex; 
+            flex-wrap: wrap; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 8px; 
+            background: #fffdf9; 
+            padding: 15px; 
+            border-radius: 10px; 
+            position: relative; 
+        }
+        .word-btn { 
+            padding: 8px 16px; 
+            border: 1px solid var(--purple); 
+            border-radius: 20px; 
+            background: white; 
+            cursor: pointer; 
+            font-size: 1.1rem; 
+            margin: 4px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .word-btn.used { 
+            opacity: 0.25; 
+            pointer-events: none; 
+        }
+        
+        .pop-sentence { 
+            font-size: 1.5rem; 
+            color: var(--purple); 
+            font-weight: bold;
+            animation: bubblePop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
+        @keyframes bubblePop { 
+            0% { transform: scale(0.7); opacity: 0; } 
+            100% { transform: scale(1); opacity: 1; } 
+        }
+
+        .explanation { 
+            background: #f0f8ff; 
+            padding: 18px; 
+            border-radius: 10px; 
+            margin-top: 20px; 
+            text-align: left; 
+            font-size: 1rem; 
+            display: none; 
+            border-left: 5px solid #3498db; 
+            line-height: 1.6; 
+        }
+        .next-btn { 
+            display: none; 
+            background: var(--dark); 
+            color: white; 
+            border: none; 
+            padding: 12px 40px; 
+            border-radius: 30px; 
+            font-size: 1.15rem; 
+            cursor: pointer; 
+            margin: 20px auto 0; 
+            transition: background 0.2s;
+        }
+        .next-btn:hover {
+            background: #1a252f;
+        }
+        .speaker-btn { 
+            background: #eee; 
+            border: none; 
+            border-radius: 50%; 
+            width: 48px; 
+            height: 48px; 
+            cursor: pointer; 
+            display: none; 
+            font-size: 1.3rem; 
+            margin: 15px auto 0; 
+            transition: background 0.2s;
+        }
+        .speaker-btn:hover {
+            background: #ddd;
+        }
+
+        .print-btn {
+            margin-top:25px; 
+            background:none; 
+            border:none; 
+            text-decoration:underline; 
+            color:#777; 
+            cursor:pointer;
+            font-size: 0.95rem;
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; width: 100%; color: black; background: white; }
+            .print-title { font-size: 18pt; text-align: center; margin-bottom: 25px; font-weight: bold; border-bottom: 2px solid #000; padding-bottom: 10px; }
+            .print-part-header { font-size: 14pt; font-weight: bold; margin-top: 20px; margin-bottom: 10px; background: #eee; padding: 4px 8px; }
+            .print-page { page-break-after: always; padding: 10px; }
+            .print-q { margin-bottom: 18px; font-size: 11pt; page-break-inside: avoid; }
+            .print-ja { margin-bottom: 4px; font-weight: bold; }
+            .print-en { margin-left: 20px; font-size: 11.5pt; margin-top: 4px; }
+            .print-choices { margin-left: 20px; margin-top: 6px; display: flex; flex-wrap: wrap; gap: 15px; }
+            .choice-item { margin-right: 10px; }
+        }
+        .print-only { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="tab-container no-print">
+    <div class="tab active" onclick="changePart(1)">Part 1: as...as</div>
+    <div class="tab" onclick="changePart(2)">Part 2: 倍数表現</div>
+    <div class="tab" onclick="changePart(3)">Part 3: the+比較級</div>
+    <div class="tab" onclick="changePart(4)">Part 4: the..., the...</div>
+    <div class="tab" onclick="changePart(5)">Part 5: 最上級書き換え</div>
+    <div class="tab" onclick="changePart(6)">Part 6: 穴埋め四択</div>
+</div>
+
+<div class="container no-print">
+    <div id="progress" style="color:#777; font-size:1.05rem; margin-bottom: 12px; font-weight: bold;"></div>
+    <div id="questionText" class="question-box"></div>
+    <div id="interactionArea"></div>
+    <div id="explanation" class="explanation"></div>
+    <button id="speakerBtn" class="speaker-btn" onclick="speakText()">🔊</button>
+    <div id="feedback" style="margin:15px; color:var(--purple); font-size: 1.3rem; font-weight: bold;"></div>
+    <button id="nextBtn" class="next-btn" onclick="nextQuestion()">Next →</button>
+    <button class="print-btn" onclick="window.print()">🖨️ ワークシートを印刷する</button>
+</div>
+
+<div id="print-area" class="print-only">
+    <div class="print-page">
+        <div class="print-title">22章 比較① - ワークシート</div>
+        <div id="ws-content"></div>
+    </div>
+</div>
+
+<script>
+const quizData = [
+    // PART 1: as...asの並べ替え問題（4問）
+    { part: 1, ja: "DavidはSarahほどお金を持っていない。", words: ["David", "doesn't", "have", "as", "much", "money", "as", "Sarah", "."], full: "David doesn't have as much money as Sarah.", exp: "「not as + 名詞 + as ～」で「～ほど…を持っていない」を表します。", voice: "David doesn't have as much money as Sarah." },
+    { part: 1, ja: "あなたは、あなたのお兄さんほど背が高くない。", words: ["You", "are", "not", "as", "tall", "as", "your", "brother", "."], full: "You are not as tall as your brother.", exp: "「not as + 形容詞 + as ～」で「～ほど…ではない」を表します。", voice: "You are not as tall as your brother." },
+    { part: 1, ja: "日本（の国土）は、ドイツと同じくらい広い。", words: ["Japan", "is", "as", "large", "as", "Germany", "."], full: "Japan is as large as Germany.", exp: "「as + 形容詞の原級 + as ～」で「～と同じくらい…だ」という同格比較になります。", voice: "Japan is as large as Germany." },
+    { part: 1, ja: "今日は昨日ほど寒くない。", words: ["It", "is", "not", "as", "cold", "today", "as", "yesterday", "."], full: "It is not as cold today as yesterday.", exp: "天候を表す it を主語にし、「not as cold as ～」で「～ほど寒くない」を表します。", voice: "It is not as cold today as yesterday." },
+
+    // PART 2: 倍数表現の並べ替え問題（4問）
+    { part: 2, ja: "彼らの家は、私たちの家より2倍も（値段が）高い。", words: ["Their", "house", "is", "twice", "as", "expensive", "as", "ours", "."], full: "Their house is twice as expensive as ours.", exp: "「倍数（twice） + as + 形容詞 + as ～」で「～の○倍…だ」を表します。ours = our house です。", voice: "Their house is twice as expensive as ours." },
+    { part: 2, ja: "オーストラリア（の国土）は、日本の20倍も広い。", words: ["Australia", "is", "20", "times", "as", "large", "as", "Japan", "."], full: "Australia is 20 times as large as Japan.", exp: "3倍以上は「数字 + times + as + 原級 + as ～」となります。", voice: "Australia is 20 times as large as Japan." },
+    { part: 2, ja: "Andyの年齢は、Emilyの3倍だ。", words: ["Andy", "is", "three", "times", "as", "old", "as", "Emily", "."], full: "Andy is three times as old as Emily.", exp: "年齢の倍数比較も「three times as old as ～」で表現します。", voice: "Andy is three times as old as Emily." },
+    { part: 2, ja: "チーターはライオンの2倍近くの速さで走ることができます。", words: ["A", "cheetah", "can", "run", "almost", "twice", "as", "fast", "as", "a", "lion", "."], full: "A cheetah can run almost twice as fast as a lion.", exp: "「almost twice as... as ～」で「～のほぼ2倍の…」という意味になります。", voice: "A cheetah can run almost twice as fast as a lion." },
+
+    // PART 3: 比較級にtheがつきます表現の並べ替え問題（4問）
+    { part: 3, ja: "私の猫は、2匹のうちの太っている方だ。", words: ["My", "cat", "is", "the", "fatter", "of", "the", "two", "."], full: "My cat is the fatter of the two.", exp: "2つのうち「～な方」という場合、「the + 比較級 + of the two」の形を用います。", voice: "My cat is the fatter of the two." },
+    { part: 3, ja: "私の夫は、2人のうちの背の高い方だ。", words: ["My", "husband", "is", "the", "taller", "of", "the", "two", "."], full: "My husband is the taller of the two.", exp: "2人を比較して特定の方を指すため、比較級にも the が付きます。", voice: "My husband is the taller of the two." },
+    { part: 3, ja: "カズミは、2人の女の子のうちの年上の方です。", words: ["Kazumi", "is", "the", "older", "of", "the", "two", "girls", "."], full: "Kazumi is the older of the two girls.", exp: "「the + 比較級 + of the two + 複数名詞」の構文です。", voice: "Kazumi is the older of the two girls." },
+    { part: 3, ja: "クリスは2人の少年のうちで年上の方です。", words: ["Chris", "is", "the", "older", "of", "the", "two", "boys", "."], full: "Chris is the older of the two boys.", exp: "「the older of the two boys」で「2人の少年のうち年上のほう」という意味になります。", voice: "Chris is the older of the two boys." },
+
+    // PART 4: the 比較級 〜, the 比較級 の並べ替え問題（4問）
+    { part: 4, ja: "天候が暖かければ暖かいほど、私の気分も良くなる。", words: ["The", "warmer", "the", "weather", "is", ",", "the", "better", "I", "feel", "."], full: "The warmer the weather is, the better I feel.", exp: "「The + 比較級 S V, the + 比較級 S V」で「～すればするほど、ますます…」を表します。", voice: "The warmer the weather is, the better I feel." },
+    { part: 4, ja: "早く家を出れば出るほど、私たちは早く到着する。", words: ["The", "sooner", "we", "leave", "home", ",", "the", "earlier", "we", "will", "arrive", "."], full: "The sooner we leave home, the earlier we will arrive.", exp: "「早く（sooner）」と「早く（earlier）」の比較級を並べて表現します。", voice: "The sooner we leave home, the earlier we will arrive." },
+    { part: 4, ja: "そのホテル（の値段）が高ければ高いほど、サービスが良くなる。", words: ["The", "more", "expensive", "the", "hotel", "is", ",", "the", "better", "the", "service", "is", "."], full: "The more expensive the hotel is, the better the service is.", exp: "expensive の比較級は more expensive となり、the の直後に置きます。", voice: "The more expensive the hotel is, the better the service is." },
+    { part: 4, ja: "あなたは疲れていればいるほど、集中するのが大変になる。", words: ["The", "more", "tired", "you", "are", ",", "the", "harder", "it", "is", "to", "concentrate", "."], full: "The more tired you are, the harder it is to concentrate.", exp: "「The + 比較級 S V」の後ろに「it is + 形容詞 + to do」の形式主語構文が入る形です。", voice: "The more tired you are, the harder it is to concentrate." },
+
+    // PART 5: 最上級の書き換えの並べ替え問題（6問）
+    { part: 5, ja: "トレーシーはクラスの他のどの女の子よりも上手に歌うことができます。", words: ["Tracy", "can", "sing", "better", "than", "any", "other", "girl", "in", "her", "class", "."], full: "Tracy can sing better than any other girl in her class.", exp: "「比較級 + than any other + 単数名詞」で最上級「他のどの…よりも～」を意味します。", voice: "Tracy can sing better than any other girl in her class." },
+    { part: 5, ja: "トレーシーほど上手に歌える女の子はクラスに他にいない。", words: ["No", "other", "girl", "in", "her", "class", "can", "sing", "as", "well", "as", "Tracy", "."], full: "No other girl in her class can sing as well as Tracy.", exp: "「No other + 単数名詞 ... as + 原級 + as ～」で「～ほど…なものは他にない」を表します。", voice: "No other girl in her class can sing as well as Tracy." },
+    { part: 5, ja: "トレーシーより上手に歌える女の子はクラスに他にいない。", words: ["No", "other", "girl", "in", "her", "class", "can", "sing", "better", "than", "Tracy", "."], full: "No other girl in her class can sing better than Tracy.", exp: "「No other + 単数名詞 ... 比較級 + than ～」で「～より…なものは他にない」を表します。", voice: "No other girl in her class can sing better than Tracy." },
+    { part: 5, ja: "これは私がこれまでに見た他のどの映画よりもつまらない。", words: ["This", "movie", "is", "more", "boring", "than", "any", "other", "movie", "I", "have", "ever", "seen", "."], full: "This movie is more boring than any other movie I have ever seen.", exp: "「more boring than any other + 単数名詞」の書き換えです。", voice: "This movie is more boring than any other movie I have ever seen." },
+    { part: 5, ja: "この映画ほどつまらない映画は他にない。", words: ["No", "other", "movie", "is", "as", "boring", "as", "this", "one", "."], full: "No other movie is as boring as this one.", exp: "「No other + 単数名詞 + is as + 原級 + as ～」の表現です。", voice: "No other movie is as boring as this one." },
+    { part: 5, ja: "この映画以上につまらない映画は他にない。", words: ["No", "other", "movie", "is", "more", "boring", "than", "this", "one", "."], full: "No other movie is more boring than this one.", exp: "「No other + 単数名詞 + is + 比較級 + than ～」の表現です。", voice: "No other movie is more boring than this one." },
+
+    // PART 6: すべての比較の穴埋め問題（四択・15問）
+    { part: 6, ja: "この部屋はあの部屋の3倍の広さです。", q: "This room is three times as <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> as that one.", choices: ["large", "larger", "largest", "more large"], ans: "large", exp: "「倍数 + as + 原級 + as」なので、形容詞の原級 large が入ります。", voice: "This room is three times as large as that one." },
+    { part: 6, ja: "彼女は2人の姉妹のうちで背が高い方です。", q: "She is <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> of the two sisters.", choices: ["taller", "the taller", "tallest", "the tallest"], ans: "the taller", exp: "「2人のうち～な方」という時は、「the + 比較級」にします。", voice: "She is the taller of the two sisters." },
+    { part: 6, ja: "勉強すればするほど、多くのことを学ぶことができます。", q: "The <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> you study, the more you learn.", choices: ["more", "most", "much", "many"], ans: "more", exp: "「The + 比較級 ..., the + 比較級 ...」の構文です。much の比較級 more を使います。", voice: "The more you study, the more you learn." },
+    { part: 6, ja: "富士山は日本で他のどの山よりも高い。", q: "Mt. Fuji is higher than <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> mountain in Japan.", choices: ["any other", "all other", "other", "any"], ans: "any other", exp: "「比較級 + than any other + 単数名詞」で「他のどの…よりも～」という意味になります。", voice: "Mt. Fuji is higher than any other mountain in Japan." },
+    { part: 6, ja: "時間の価値ほど大切なものは何もない。", q: "Nothing is <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> valuable as time.", choices: ["as", "more", "than", "most"], ans: "as", exp: "「Nothing is as + 原級 + as ～」で「～ほど…なものはない」となります。", voice: "Nothing is as valuable as time." },
+    { part: 6, ja: "トムは弟ほど速く走ることはできません。", q: "Tom cannot run <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> fast as his brother.", choices: ["as", "than", "more", "so much"], ans: "as", exp: "否定文での「not as [so] + 原級 + as ～」で「～ほど…ない」という意味になります。", voice: "Tom cannot run as fast as his brother." },
+    { part: 6, ja: "高所へ行けば行くほど、空気は冷たくなります。", q: "The higher you go, <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> the air becomes.", choices: ["the colder", "colder", "coldest", "the coldest"], ans: "the colder", exp: "前半が The higher ～ なので、後半も「the + 比較級」の the colder になります。", voice: "The higher you go, the colder the air becomes." },
+    { part: 6, ja: "この湖は日本で2番目に深いです。", q: "This lake is <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> deepest in Japan.", choices: ["the second", "second", "the two", "twice"], ans: "the second", exp: "「the + 序数 (second) + 最上級」で「○番目に～」を表します。", voice: "This lake is the second deepest in Japan." },
+    { part: 6, ja: "日本で世界遺産ほど人気のある観光地は他にありません。", q: "No <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> place in Japan is as popular as World Heritage sites.", choices: ["other", "another", "others", "any"], ans: "other", exp: "「No other + 単数名詞 + is as... as ～」の形で用いられます。", voice: "No other place in Japan is as popular as World Heritage sites." },
+    { part: 6, ja: "彼の新しい本は前の本の5倍売れました。", q: "His new book sold five times <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> copies as his previous one.", choices: ["as many", "many as", "as much", "more than"], ans: "as many", exp: "可算名詞(copies)の数を比べる場合「倍数 + as many + 名詞 + as ～」を用います。", voice: "His new book sold five times as many copies as his previous one." },
+    { part: 6, ja: "2つの計画のうち、より実践的な方を選びましょう。", q: "Let's choose <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> practical plan of the two.", choices: ["the more", "more", "most", "the most"], ans: "the more", exp: "of the two（2つのうち）があるので、「the + 比較級 (the more practical)」になります。", voice: "Let's choose the more practical plan of the two." },
+    { part: 6, ja: "早起きすればするほど、より多くの時間を楽しめます。", q: "The earlier you get up, the <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> time you will have.", choices: ["more", "most", "many", "much"], ans: "more", exp: "「The + 比較級 ..., the + 比較級 ...」で time にかかる比較級は more です。", voice: "The earlier you get up, the more time you will have." },
+    { part: 6, ja: "健康より価値のあるものはありません。", q: "Nothing is <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> than health.", choices: ["more precious", "as precious", "most precious", "precious"], ans: "more precious", exp: "後ろに than があるため、比較級の more precious が適切です。「Nothing is more... than～」で最上級の意味になります。", voice: "Nothing is more precious than health." },
+    { part: 6, ja: "この辞書はあの辞書の半分の厚さです。", q: "This dictionary is <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> as thick as that one.", choices: ["half", "twice", "two", "double"], ans: "half", exp: "「half as + 原級 + as ～」で「～の半分の…」を表します。", voice: "This dictionary is half as thick as that one." },
+    { part: 6, ja: "彼女はクラスの誰よりも一生懸命練習しました。", q: "She practiced harder than <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> else in her class.", choices: ["anyone", "everyone", "someone", "no one"], ans: "anyone", exp: "「比較級 + than anyone else」で「他の誰よりも～」を表します。", voice: "She practiced harder than anyone else in her class." }
+];
+
+let currentIdx = 0, userSort = [], currentPart = 1;
+let filteredQuiz = quizData.filter(q => q.part === 1);
+
+function changePart(part) {
+    currentPart = part; 
+    currentIdx = 0;
+    filteredQuiz = quizData.filter(q => q.part === part);
+    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i + 1 === part));
+    loadQuestion();
+}
+
+function loadQuestion() {
+    const data = filteredQuiz[currentIdx];
+    document.getElementById('progress').textContent = `Part ${currentPart} - Q${currentIdx+1} / ${filteredQuiz.length}`;
+    document.getElementById('nextBtn').style.display = "none";
+    document.getElementById('explanation').style.display = "none";
+    document.getElementById('speakerBtn').style.display = "none";
+    
+    const interaction = document.getElementById('interactionArea');
+    interaction.style.display = "block"; 
+    interaction.innerHTML = "";
+    userSort = [];
+
+    const qBox = document.getElementById('questionText');
+    qBox.innerHTML = `<span class="translation">${data.ja}</span>${data.q || ""}`;
+
+    if (data.part === 6) {
+        // 四択問題
+        const choicesDiv = document.createElement('div');
+        choicesDiv.style.display = "flex";
+        choicesDiv.style.flexWrap = "wrap";
+        choicesDiv.style.justifyContent = "center";
+        
+        shuffleArray(data.choices).forEach(c => {
+            const b = document.createElement('button'); 
+            b.className = "btn"; 
+            b.textContent = c;
+            b.onclick = () => { 
+                if(c === data.ans) { 
+                    const blank = document.getElementById('b-v');
+                    if(blank) { 
+                        blank.textContent = c; 
+                        blank.style.color = "var(--purple)"; 
+                    }
+                    showWin(false); 
+                } else {
+                    alert("もう一度考えてみよう！");
+                }
+            };
+            choicesDiv.appendChild(b);
+        });
+        interaction.appendChild(choicesDiv);
+    } else {
+        // 並べ替え問題 (Part 1〜5)
+        qBox.innerHTML = `<span class="translation">${data.ja}</span><div class="answer-area" id="az"></div>`;
+        const bank = document.createElement('div');
+        
+        shuffleArray(data.words).forEach(w => {
+            const b = document.createElement('button'); 
+            b.className = "word-btn"; 
+            b.textContent = w;
+            b.onclick = () => { 
+                b.classList.add('used'); 
+                userSort.push({text: w, btn: b}); 
+                renderSort(); 
+            };
+            bank.appendChild(b);
+        });
+        interaction.appendChild(bank);
+
+        const ck = document.createElement('button'); 
+        ck.className = "btn"; 
+        ck.style.background = "var(--purple)"; 
+        ck.style.color = "white"; 
+        ck.style.fontWeight = "bold";
+        ck.style.marginTop = "15px";
+        ck.textContent = "Check Answer";
+        ck.onclick = () => { 
+            const userText = userSort.map(i => i.text).join(" ")
+                .replace(/ ,/g, ",")
+                .replace(/ \./g, ".");
+            if(userText === data.full) {
+                showWin(true); 
+            } else {
+                alert("語順を確認してみよう！"); 
+            }
+        };
+        interaction.appendChild(ck);
+    }
+}
+
+function renderSort() {
+    const zone = document.getElementById('az'); 
+    zone.innerHTML = "";
+    userSort.forEach((item, idx) => {
+        const s = document.createElement('span'); 
+        s.className = "word-btn"; 
+        s.textContent = item.text;
+        s.onclick = () => { 
+            item.btn.classList.remove('used'); 
+            userSort.splice(idx, 1); 
+            renderSort(); 
+        };
+        zone.appendChild(s);
+    });
+}
+
+function showWin(isSort = false) {
+    confetti({ particleCount: 90, spread: 60, origin: { y: 0.6 } });
+    const data = filteredQuiz[currentIdx];
+    
+    if(isSort) {
+        const az = document.getElementById('az');
+        az.innerHTML = `<div class="pop-sentence">${data.full}</div>`;
+        document.getElementById('interactionArea').innerHTML = "";
+    } else {
+        document.getElementById('interactionArea').style.display = 'none';
+    }
+
+    const expBox = document.getElementById('explanation');
+    expBox.innerHTML = `<strong>解説:</strong> ${data.exp}`;
+    expBox.style.display = "block";
+    
+    document.getElementById('speakerBtn').style.display = "block";
+    document.getElementById('nextBtn').style.display = "block";
+}
+
+function speakText() {
+    const data = filteredQuiz[currentIdx];
+    const uttr = new SpeechSynthesisUtterance(data.voice);
+    uttr.lang = "en-US";
+    speechSynthesis.speak(uttr);
+}
+
+function nextQuestion() {
+    currentIdx++;
+    if (currentIdx < filteredQuiz.length) {
+        loadQuestion();
+    } else {
+        if(currentPart < 6) {
+            alert(`Part ${currentPart} クリア！次の Part へ進みます。`);
+            changePart(currentPart + 1);
+        } else {
+            alert("すべての問題をクリアしました！素晴らしい学習成果です！");
+        }
+    }
+}
+
+function shuffleArray(array) {
+    let result = [...array];
+    for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
+}
+
+window.onload = () => {
+    const ws = document.getElementById('ws-content');
+    let partTitles = {
+        1: "Part 1: as...asの並べ替え問題",
+        2: "Part 2: 倍数表現の並べ替え問題",
+        3: "Part 3: 比較級にtheがつく表現の並べ替え問題",
+        4: "Part 4: the 比較級 ..., the 比較級 ... の並べ替え問題",
+        5: "Part 5: 最上級の書き換え問題",
+        6: "Part 6: すべての比較の穴埋め問題（四択）"
+    };
+
+    let currentPrintPart = 0;
+
+    quizData.forEach((q, i) => {
+        if(q.part !== currentPrintPart) {
+            currentPrintPart = q.part;
+            const pHeader = document.createElement('div');
+            pHeader.className = 'print-part-header';
+            pHeader.textContent = partTitles[currentPrintPart];
+            ws.appendChild(pHeader);
+        }
+
+        const div = document.createElement('div'); 
+        div.className = 'print-q';
+        
+        let line = q.q 
+            ? q.q.replace(/<span class='blank'.*?<\/span>/, "( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )") 
+            : "__________________________________________________";
+        
+        let choicesHtml = "";
+        if(q.choices) {
+            choicesHtml = "<div class='print-choices'>" + shuffleArray(q.choices).map((c, idx) => `<span class='choice-item'>(${idx+1}) ${c}</span>`).join("") + "</div>";
+        } else if(q.words) {
+            choicesHtml = `<div class='print-en' style='font-size:10pt; color:#444;'>[ ${shuffleArray(q.words).join(" / ")} ]</div>`;
+        }
+        
+        div.innerHTML = `<div class='print-ja'>${i+1}. ${q.ja}</div><div class='print-en'>${line}</div>${choicesHtml}`;
+        ws.appendChild(div);
+    });
+    
+    loadQuestion();
+};
+</script>
+</body>
+</html>
