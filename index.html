@@ -27,8 +27,9 @@
             list-style: none;
             padding: 0;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 12px;
+            /* 3カラム（3等分）に固定 */
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 15px;
             max-width: 1000px;
             margin: 0 auto;
         }
@@ -43,12 +44,21 @@
             font-weight: bold;
             transition: all 0.2s ease;
             box-shadow: 0 4px 0 #e6b800; /* ボタンっぽく立体的な影 */
+            height: 100%; /* ボタンの高さを揃える */
+            box-sizing: border-box;
         }
         /* マウスを乗せた時やタップした時 */
         li a:hover {
             transform: translateY(2px); /* 少し沈む動き */
             box-shadow: 0 2px 0 #e6b800;
             background-color: #fffdf0;
+        }
+
+        /* スマホなどの小さな画面（幅600px以下）の時は崩れないように1列にするレスポンシブ対応 */
+        @media (max-width: 600px) {
+            ul {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -65,7 +75,7 @@
 </a></li>
 
     <li><a href="Pre2-grammar-Unit9-16-Practice-Test.html">9章〜16章<br>
-まとめ　予想テスト<br>
+まとめ 予想テスト<br>
         ワークシート対応！<br>
         解説付き！
 </a></li>
