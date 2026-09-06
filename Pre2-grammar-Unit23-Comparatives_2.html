@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>23章 比較② - 英検準2級レベル問題集</title>
+    <link href="https://fonts.googleapis.com/css2?family=Andika&family=Kosugi+Maru&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root { 
+            --purple: #8e44ad; 
+            --purple-light: #f5edfa;
+            --dark: #2c3e50; 
+            --font-main: 'Andika', 'Kosugi Maru', sans-serif; 
+        }
+        body { 
+            font-family: var(--font-main); 
+            background: #f0f2f5; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 20px; 
+            margin: 0;
+        }
+        
+        .tab-container { 
+            display: flex; 
+            flex-wrap: wrap;
+            gap: 8px; 
+            margin-bottom: 20px; 
+            justify-content: center;
+            max-width: 950px;
+            width: 100%;
+        }
+        .tab { 
+            padding: 10px 16px; 
+            background: #e0e0e0; 
+            border-radius: 10px 10px 0 0; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 0.9rem;
+            color: #555;
+            transition: all 0.2s ease;
+        }
+        .tab:hover {
+            background: #d0d0d0;
+        }
+        .tab.active { 
+            background: var(--purple); 
+            color: white; 
+        }
+
+        .container { 
+            background: white; 
+            width: 95%; 
+            max-width: 900px; 
+            padding: 35px; 
+            border-radius: 20px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+            border-top: 8px solid var(--purple); 
+            text-align: center; 
+            box-sizing: border-box;
+        }
+        .question-box { 
+            font-size: 1.25rem; 
+            margin-bottom: 25px; 
+            padding: 25px; 
+            background: #fdfaff; 
+            border-radius: 12px; 
+            border: 1px solid #ebdcf5; 
+            line-height: 1.7; 
+            position: relative; 
+        }
+        .translation { 
+            font-size: 1.1rem; 
+            color: #333; 
+            margin-bottom: 12px; 
+            display: block; 
+            font-weight: bold; 
+        }
+        .blank { 
+            border-bottom: 2px solid var(--purple); 
+            color: var(--purple); 
+            font-weight: bold; 
+            padding: 0 10px; 
+        }
+        .select-box {
+            font-size: 1.1rem;
+            font-family: inherit;
+            padding: 5px 10px;
+            border-radius: 6px;
+            border: 2px solid var(--purple);
+            background-color: white;
+            color: var(--dark);
+            cursor: pointer;
+            margin: 0 5px;
+        }
+        
+        .btn { 
+            padding: 12px 20px; 
+            border: 1px solid #ccc; 
+            border-radius: 8px; 
+            background: white; 
+            cursor: pointer; 
+            font-size: 1.1rem; 
+            font-family: inherit; 
+            margin: 6px; 
+            transition: 0.2s; 
+        }
+        .btn:hover { 
+            border-color: var(--purple); 
+            background: var(--purple-light); 
+        }
+        
+        .answer-area { 
+            min-height: 70px; 
+            border-bottom: 2px dashed var(--purple); 
+            margin: 20px 0; 
+            display: flex; 
+            flex-wrap: wrap; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 8px; 
+            background: #fffdf9; 
+            padding: 15px; 
+            border-radius: 10px; 
+            position: relative; 
+        }
+        .word-btn { 
+            padding: 8px 16px; 
+            border: 1px solid var(--purple); 
+            border-radius: 20px; 
+            background: white; 
+            cursor: pointer; 
+            font-size: 1.1rem; 
+            margin: 4px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .word-btn.used { 
+            opacity: 0.25; 
+            pointer-events: none; 
+        }
+        
+        .pop-sentence { 
+            font-size: 1.4rem; 
+            color: var(--purple); 
+            font-weight: bold;
+            animation: bubblePop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
+        @keyframes bubblePop { 
+            0% { transform: scale(0.7); opacity: 0; } 
+            100% { transform: scale(1); opacity: 1; } 
+        }
+
+        .explanation { 
+            background: #f0f8ff; 
+            padding: 18px; 
+            border-radius: 10px; 
+            margin-top: 20px; 
+            text-align: left; 
+            font-size: 1rem; 
+            display: none; 
+            border-left: 5px solid #3498db; 
+            line-height: 1.6; 
+        }
+        .next-btn { 
+            display: none; 
+            background: var(--dark); 
+            color: white; 
+            border: none; 
+            padding: 12px 40px; 
+            border-radius: 30px; 
+            font-size: 1.15rem; 
+            cursor: pointer; 
+            margin: 20px auto 0; 
+            transition: background 0.2s;
+        }
+        .next-btn:hover {
+            background: #1a252f;
+        }
+        .speaker-btn { 
+            background: #eee; 
+            border: none; 
+            border-radius: 50%; 
+            width: 48px; 
+            height: 48px; 
+            cursor: pointer; 
+            display: none; 
+            font-size: 1.3rem; 
+            margin: 15px auto 0; 
+            transition: background 0.2s;
+        }
+        .speaker-btn:hover {
+            background: #ddd;
+        }
+
+        .print-btn {
+            margin-top:25px; 
+            background:none; 
+            border:none; 
+            text-decoration:underline; 
+            color:#777; 
+            cursor:pointer;
+            font-size: 0.95rem;
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; width: 100%; color: black; background: white; }
+            .print-title { font-size: 18pt; text-align: center; margin-bottom: 25px; font-weight: bold; border-bottom: 2px solid #000; padding-bottom: 10px; }
+            .print-part-header { font-size: 14pt; font-weight: bold; margin-top: 20px; margin-bottom: 10px; background: #eee; padding: 4px 8px; }
+            .print-page { page-break-after: always; padding: 10px; }
+            .print-q { margin-bottom: 18px; font-size: 11pt; page-break-inside: avoid; }
+            .print-ja { margin-bottom: 4px; font-weight: bold; }
+            .print-en { margin-left: 20px; font-size: 11.5pt; margin-top: 4px; }
+            .print-choices { margin-left: 20px; margin-top: 6px; display: flex; flex-wrap: wrap; gap: 12px; }
+            .choice-item { margin-right: 10px; }
+            .word-bank { margin-left: 20px; font-size: 10pt; color: #444; border: 1px dashed #666; padding: 6px 12px; margin-bottom: 10px; border-radius: 6px; }
+        }
+        .print-only { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="tab-container no-print">
+    <div class="tab active" onclick="changePart(1)">Part 1: 数量の強調</div>
+    <div class="tab" onclick="changePart(2)">Part 2: 可能な限り / 同等</div>
+    <div class="tab" onclick="changePart(3)">Part 3: 比較慣用表現</div>
+    <div class="tab" onclick="changePart(4)">Part 4: 多彩な比較</div>
+</div>
+
+<div class="container no-print">
+    <div id="progress" style="color:#777; font-size:1.05rem; margin-bottom: 12px; font-weight: bold;"></div>
+    <div id="questionText" class="question-box"></div>
+    <div id="interactionArea"></div>
+    <div id="explanation" class="explanation"></div>
+    <button id="speakerBtn" class="speaker-btn" onclick="speakText()">🔊</button>
+    <div id="feedback" style="margin:15px; color:var(--purple); font-size: 1.3rem; font-weight: bold;"></div>
+    <button id="nextBtn" class="next-btn" onclick="nextQuestion()">Next →</button>
+    <button class="print-btn" onclick="window.print()">🖨️ ワークシートを印刷する</button>
+</div>
+
+<div id="print-area" class="print-only">
+    <div class="print-page">
+        <div class="print-title">23章 比較② - ワークシート</div>
+        <div id="ws-content"></div>
+    </div>
+</div>
+
+<script>
+const quizData = [
+    // PART 1: as many as / as few as / as much as / as little as (選択6問、並べ替え2問)
+    { 
+        part: 1, type: "choice",
+        ja: "テスト前日、ユリコは1日に5杯も抹茶ラテを飲んだ。", 
+        q: "Before the test, Yuriko drank <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> five cups of matcha latte a day.", 
+        choices: ["as many as", "as few as", "as much as", "as little as"], 
+        ans: "as many as", 
+        exp: "cups（〜杯）という可算名詞の数について、「5杯も（多さの強調）」を表すので as many as が正解です。" 
+    },
+    { 
+        part: 1, type: "choice",
+        ja: "雨の日の放課後、図書館にはわずか3人の生徒しかいなかった。", 
+        q: "On the rainy day, there were <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> three students in the library.", 
+        choices: ["as few as", "as many as", "as much as", "as little as"], 
+        ans: "as few as", 
+        exp: "students（生徒）は可算名詞です。「わずか3人しかいない（少なさの強調）」には as few as を用います。" 
+    },
+    { 
+        part: 1, type: "choice",
+        ja: "学校から駅までの距離は、なんと2キロもあった。", 
+        q: "There was <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> two kilometers from our school to the station.", 
+        choices: ["as much as", "as little as", "as many as", "as few as"], 
+        ans: "as much as", 
+        exp: "距離・量の大きさを強調して「2キロも（多さ・長さの強調）」を表す場合は as much as を選びます。" 
+    },
+    { 
+        part: 1, type: "choice",
+        ja: "文化祭のダンス発表には、300人もの生徒が見に来た。", 
+        q: "<span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> 300 students came to watch the dance performance.", 
+        choices: ["As many as", "As few as", "As much as", "As little as"], 
+        ans: "As many as", 
+        exp: "文頭で「300人もの生徒が（人数の多さの強調）」を表すため As many as になります。" 
+    },
+    { 
+        part: 1, type: "choice",
+        ja: "鈴木先生の数学の補習には、わずか2人の生徒しか来なかった。", 
+        q: "There were <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> two students at Mr. Suzuki's extra class.", 
+        choices: ["as few as", "as many as", "as little as", "as much as"], 
+        ans: "as few as", 
+        exp: "数えられる人数（2人）が「わずか〜しかいない」と少ないことを強調するため as few as が入ります。" 
+    },
+    { 
+        part: 1, type: "choice",
+        ja: "省エネを心がけているので、ユリコの今月の電気代はわずか2,000円だった。", 
+        q: "Yuriko's electric bill was <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> 2,000 yen this month.", 
+        choices: ["as little as", "as much as", "as few as", "as many as"], 
+        ans: "as little as", 
+        exp: "2,000 yen という「金額」は不可算（量の扱い）です。「わずか〜しか（金額の少なさの強調）」を表すので as little as が正解です。" 
+    },
+    { 
+        part: 1, type: "sort",
+        ja: "ユリコは毎月のお小遣いの50％もの金額を本に使っている。", 
+        words: ["Yuriko", "spends", "as", "much", "as", "50%", "of", "her", "allowance", "on", "books", "."], 
+        full: "Yuriko spends as much as 50% of her allowance on books.", 
+        exp: "割合や金額の多さを強調するときは as much as を用います。" 
+    },
+    { 
+        part: 1, type: "sort",
+        ja: "この部活の練習時間は、日によってわずか30分から2時間まで幅がある。", 
+        words: ["Our", "practice", "time", "varies", "from", "as", "little", "as", "30", "minutes", "to", "two", "hours", "."], 
+        full: "Our practice time varies from as little as 30 minutes to two hours.", 
+        exp: "「わずか30分（時間の短さ・少なさの強調）」を表すために as little as を使います。" 
+    },
+
+    // PART 2: as ... as possible / as ... as 人 can / just as ... as (プルダウン6問、並べ替え3問)
+    { 
+        part: 2, type: "dropdown",
+        ja: "「部活に遅れてすみません！できる限り速く走ってきたのですが…」", 
+        q: "I'm sorry I'm late for practice. I ran as <span class='blank'>[dropdown]</span> as I could.", 
+        options: ["fast", "badly", "hardly", "quietly", "long", "well"],
+        ans: "fast", 
+        exp: "「できるだけ速く」なので副詞 fast を使い、as fast as I could とします。" 
+    },
+    { 
+        part: 2, type: "dropdown",
+        ja: "鈴木先生のテストは難しかったが、ユリコはできる限り一生懸命解いた。", 
+        q: "The test was hard, but Yuriko answered as <span class='blank'>[dropdown]</span> as she could.", 
+        options: ["hard", "fast", "quietly", "well", "often", "long"],
+        ans: "hard", 
+        exp: "「一生懸命に」は副詞 hard です。as hard as she could で「できる限り一生懸命に」となります。" 
+    },
+    { 
+        part: 2, type: "dropdown",
+        ja: "「放課後、どれくらい残れる？」「居られるだけ長く居られるよ。」", 
+        q: "'How long can you stay after school?' 'I can stay as <span class='blank'>[dropdown]</span> as I like.'", 
+        options: ["long", "fast", "often", "well", "hard", "quietly"],
+        ans: "long", 
+        exp: "時間の長さを表すため as long as I like（好きなだけ長く）が正解です。" 
+    },
+    { 
+        part: 2, type: "dropdown",
+        ja: "イベントの準備に取りかかりたいので、できるだけ早く返事をください。", 
+        q: "Please reply to me as <span class='blank'>[dropdown]</span> as possible.", 
+        options: ["soon", "fast", "well", "often", "hard", "long"],
+        ans: "soon", 
+        exp: "「できるだけ早く（時期・時間）」は as soon as possible を用います。" 
+    },
+    { 
+        part: 2, type: "dropdown",
+        ja: "スピーチコンテストで勝つために、できるだけ頻繁に英語を話すようにしています。", 
+        q: "I try to speak English as <span class='blank'>[dropdown]</span> as I can to win the speech contest.", 
+        options: ["often", "long", "well", "soon", "fast", "hard"],
+        ans: "often", 
+        exp: "「できるだけ頻繁に」は頻度を表す as often as I can になります。" 
+    },
+    { 
+        part: 2, type: "dropdown",
+        ja: "図書館では、できる限り静かに歩くようにしてください。", 
+        q: "Please walk as <span class='blank'>[dropdown]</span> as you can in the library.", 
+        options: ["quietly", "hard", "fast", "well", "soon", "long"],
+        ans: "quietly", 
+        exp: "「静かに」は副詞 quietly を使い、as quietly as you can と表現します。" 
+    },
+    { 
+        part: 2, type: "sort",
+        ja: "この新調した体育館の床は、教室の床と全く同じくらい滑りやすい。", 
+        words: ["The", "new", "floor", "in", "this", "gym", "is", "just", "as", "slippery", "as", "that", "in", "the", "classroom", "."], 
+        full: "The new floor in this gym is just as slippery as that in the classroom.", 
+        exp: "just as ... as 〜 で「〜とまさに同じくらい…だ」という強調表現になります。" 
+    },
+    { 
+        part: 2, type: "sort",
+        ja: "ユリコは英語だけでなく、数学も全く同じくらい一生懸命に勉強している。", 
+        words: ["Yuriko", "studies", "math", "just", "as", "hard", "as", "English", "."], 
+        full: "Yuriko studies math just as hard as English.", 
+        exp: "「英語と同じくらい熱心に」は study math just as hard as English と並べます。" 
+    },
+    { 
+        part: 2, type: "sort",
+        ja: "彼の新曲は、前の曲と全く同じくらい素晴らしい！", 
+        words: ["His", "new", "song", "is", "just", "as", "great", "as", "his", "last", "one", "."], 
+        full: "His new song is just as great as his last one.", 
+        exp: "just as great as ... で「〜と全く同じくらい素晴らしい」を表します。" 
+    },
+
+    // PART 3: not so much A as B / B rather than A / no more than / no less than / at best / at least
+    { 
+        part: 3, type: "sort",
+        ja: "ユリコは歌い手というよりはむしろダンサーだ。", 
+        words: ["Yuriko", "is", "not", "so", "much", "a", "singer", "as", "a", "dancer", "."], 
+        full: "Yuriko is not so much a singer as a dancer.", 
+        exp: "「not so much A as B」で「AというよりはむしろBだ」を表します。" 
+    },
+    { 
+        part: 3, type: "sort",
+        ja: "ユリコはリーダーというよりむしろサポート役が得意だ。", 
+        words: ["Yuriko", "is", "a", "helper", "rather", "than", "a", "leader", "."], 
+        full: "Yuriko is a helper rather than a leader.", 
+        exp: "「B rather than A」で「AというよりむしろB」を表します。" 
+    },
+    { 
+        part: 3, type: "choice",
+        ja: "雨の日の部活には、せいぜい5人の部員しか来なかった。", 
+        q: "There were <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> five members at the club practice.", 
+        choices: ["no more than", "no less than", "at best", "at least"], 
+        ans: "no more than", 
+        exp: "「ほんの〜しか（たった〜）」という少なさの強調には no more than (= only) を使います。" 
+    },
+    { 
+        part: 3, type: "choice",
+        ja: "文化祭のスタンプラリーには、なんと200人もの生徒が参加した。", 
+        q: "<span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> 200 students joined the school event.", 
+        choices: ["No less than", "No more than", "At best", "At least"], 
+        ans: "No less than", 
+        exp: "「〜も（たくさん）」という多さの極端な強調には No less than を用います。" 
+    },
+    { 
+        part: 3, type: "choice",
+        ja: "ユリコは買い出しのために財布に20,000円も持ってきた。", 
+        q: "Yuriko has <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> 20,000 yen in her wallet.", 
+        choices: ["no less than", "no more than", "at best", "at least"], 
+        ans: "no less than", 
+        exp: "「2万円も！」と金額の多さを強調するので no less than が正解です。" 
+    },
+    { 
+        part: 3, type: "choice",
+        ja: "弟はお小遣いをもらったばかりなのに、財布にたった500円しか入っていない。", 
+        q: "My brother has <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> 500 yen in his wallet.", 
+        choices: ["no more than", "no less than", "at best", "at least"], 
+        ans: "no more than", 
+        exp: "「たった500円しか〜ない」という少なさの強調には no more than です。" 
+    },
+    { 
+        part: 3, type: "sort",
+        ja: "テスト前日、彼はたった3時間しか寝なかった。", 
+        words: ["He", "slept", "no", "more", "than", "three", "hours", "last", "night", "."], 
+        full: "He slept no more than three hours last night.", 
+        exp: "no more than + 数字 で「たった〜しか」を表します。" 
+    },
+    { 
+        part: 3, type: "sort",
+        ja: "ライブの会場には、なんと1,000人ものファンが集まった！", 
+        words: ["No", "less", "than", "1,000", "fans", "came", "to", "the", "show", "."], 
+        full: "No less than 1,000 fans came to the show.", 
+        exp: "No less than + 数字 で「なんと〜もの（多さの強調）」となります。" 
+    },
+    { 
+        part: 3, type: "choice",
+        ja: "期待して泊まったホテルだったが、せいぜい平均的なレベルだった。", 
+        q: "This is <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> an average hotel.", 
+        choices: ["at best", "at least", "no more than", "no less than"], 
+        ans: "at best", 
+        exp: "「せいぜい / 最高でも（控えめな評価）」を表すのは at best です。" 
+    },
+    { 
+        part: 3, type: "choice",
+        ja: "勉強は苦手なケンだが、勇気を出して挙手した。「彼は少なくとも勇気のある男だ。」", 
+        q: "He is <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> a brave person.", 
+        choices: ["at least", "at best", "no more than", "no less than"], 
+        ans: "at least", 
+        exp: "「少なくとも（最低限の評価として）」を表すのは at least です。" 
+    },
+    { 
+        part: 3, type: "choice",
+        ja: "この文化祭の準備を完了するには、少なくとも3日はかかるだろう。", 
+        q: "It will take <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> three days to finish the prep.", 
+        choices: ["at least", "at best", "no more than", "no less than"], 
+        ans: "at least", 
+        exp: "「少なくとも3日はかかる」という最低限の期間を表すため at least になります。" 
+    },
+    { 
+        part: 3, type: "choice",
+        ja: "今日の模擬店の売り上げは、せいぜい10,000円程度だろう。", 
+        q: "Our total sales today will be 10,000 yen <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span>.", 
+        choices: ["at best", "at least", "no more than", "no less than"], 
+        ans: "at best", 
+        exp: "文末に置いて「よく見積もっても / せいぜい」を表現する at best です。" 
+    },
+    { 
+        part: 3, type: "sort",
+        ja: "練習試合の得点はせいぜい3点というところだろう。", 
+        words: ["Our", "score", "will", "be", "three", "points", "at", "best", "."], 
+        full: "Our score will be three points at best.", 
+        exp: "at best は文末に添えて「せいぜい〜だ」という意味を付与します。" 
+    },
+    { 
+        part: 3, type: "sort",
+        ja: "ユリコは次の数学のテストで少なくとも95点は取るつもりだ。", 
+        words: ["Yuriko", "plans", "to", "get", "at", "least", "95", "points", "on", "the", "math", "test", "."], 
+        full: "Yuriko plans to get at least 95 points on the math test.", 
+        exp: "at least + 数字 で「少なくとも〜」という意味になります。" 
+    },
+
+    // PART 4: 様々な比較の文（穴埋め6問・並べ替え4問）
+    { 
+        part: 4, type: "choice",
+        ja: "北岳は日本で2番目に高い山です。", 
+        q: "Kitadake is <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> mountain in Japan.", 
+        choices: ["the second highest", "second highest", "the second higher", "the twice highest"], 
+        ans: "the second highest", 
+        exp: "「the + 序数 + 最上級」で「〜番目に…な」を表します。" 
+    },
+    { 
+        part: 4, type: "choice",
+        ja: "鈴木先生はもうこの学校では教えていない。", 
+        q: "Mr. Suzuki <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> teaches at this school.", 
+        choices: ["no longer", "not longer", "any longer", "no more"], 
+        ans: "no longer", 
+        exp: "no longer + 動詞 で「もはや〜ない（＝ not ... any longer）」を表します。" 
+    },
+    { 
+        part: 4, type: "choice",
+        ja: "ケンを心配する必要はないよ。トラブルを起こすほどバカじゃないさ。", 
+        q: "Don't worry about Ken. He is <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> to make such a mistake.", 
+        choices: ["not so foolish as", "not as foolish", "foolish not to", "too foolish as"], 
+        ans: "not so foolish as", 
+        exp: "not so foolish as to do で「〜するほど愚かではない / 〜しないだけの分別がある」という意味になります。" 
+    },
+    { 
+        part: 4, type: "choice",
+        ja: "喧嘩をしてから、彼らはもはや親友ではない。", 
+        q: "They are <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> best friends.", 
+        choices: ["no longer", "not any", "no more than", "not as"], 
+        ans: "no longer", 
+        exp: "be no longer + 名詞 で「もはや〜ではない」となります。" 
+    },
+    { 
+        part: 4, type: "choice",
+        ja: "彼は英語の日常会話すら話せない。ましてやスピーチなんてなおさらだ。", 
+        q: "He can hardly speak English, <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> give a speech.", 
+        choices: ["much less", "much more", "still more", "no more"], 
+        ans: "much less", 
+        exp: "否定文に続けて much less ...（否定をさらに強めて「ましてや〜ない」）を用います。" 
+    },
+    { 
+        part: 4, type: "choice",
+        ja: "ユリコは学年で3番目に背が高い生徒だ。", 
+        q: "Yuriko is <span class='blank' id='b-v'>&nbsp;&nbsp;&nbsp;</span> student in her grade.", 
+        choices: ["the third tallest", "third tallest", "the three tallest", "the third taller"], 
+        ans: "the third tallest", 
+        exp: "「the + 序数(third) + 最上級(tallest)」で「3番目に〜」を表します。" 
+    },
+    { 
+        part: 4, type: "sort",
+        ja: "これは私がこれまでに読んだ中で一番面白い小説だ。", 
+        words: ["This", "is", "the", "most", "interesting", "novel", "I", "have", "ever", "read", "."], 
+        full: "This is the most interesting novel I have ever read.", 
+        exp: "最上級 + 名詞 + I have ever read で「今までに読んだ中で最も…」という重要構文です。" 
+    },
+    { 
+        part: 4, type: "sort",
+        ja: "ケンは自分の非を認めないほど幼く（若く）はなかった。", 
+        words: ["Ken", "was", "not", "so", "young", "as", "to", "deny", "his", "fault", "."], 
+        full: "Ken was not so young as to deny his fault.", 
+        exp: "not so young as to do で「〜するほど若く（幼く）はない」となります。" 
+    },
+    { 
+        part: 4, type: "sort",
+        ja: "彼女はひらがなすら読めない。ましてや漢字なんてなおさらだ。", 
+        words: ["She", "cannot", "read", "Hiragana", ",", "much", "less", "Kanji", "."], 
+        full: "She cannot read Hiragana, much less Kanji.", 
+        exp: "否定文の後に , much less + 名詞 で「ましてや〜ない」を表します。" 
+    },
+    { 
+        part: 4, type: "sort",
+        ja: "この映画は今年映画館で見た中で2番目に良かった。", 
+        words: ["This", "was", "the", "second", "best", "movie", "this", "year", "."], 
+        full: "This was the second best movie this year.", 
+        exp: "the second best で「2番目に良い」を表します。" 
+    }
+];
+
+let currentIdx = 0, userSort = [], currentPart = 1;
+let filteredQuiz = quizData.filter(q => q.part === 1);
+
+function changePart(part) {
+    currentPart = part; 
+    currentIdx = 0;
+    filteredQuiz = quizData.filter(q => q.part === part);
+    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i + 1 === part));
+    loadQuestion();
+}
+
+function loadQuestion() {
+    const data = filteredQuiz[currentIdx];
+    document.getElementById('progress').textContent = `Part ${currentPart} - Q${currentIdx+1} / ${filteredQuiz.length}`;
+    document.getElementById('nextBtn').style.display = "none";
+    document.getElementById('explanation').style.display = "none";
+    document.getElementById('speakerBtn').style.display = "none";
+    
+    const interaction = document.getElementById('interactionArea');
+    interaction.style.display = "block"; 
+    interaction.innerHTML = "";
+    userSort = [];
+
+    const qBox = document.getElementById('questionText');
+
+    if (data.type === "choice") {
+        qBox.innerHTML = `<span class="translation">${data.ja}</span>${data.q}`;
+        const choicesDiv = document.createElement('div');
+        choicesDiv.style.display = "flex";
+        choicesDiv.style.flexWrap = "wrap";
+        choicesDiv.style.justifyContent = "center";
+        
+        shuffleArray(data.choices).forEach(c => {
+            const b = document.createElement('button'); 
+            b.className = "btn"; 
+            b.textContent = c;
+            b.onclick = () => { 
+                if(c === data.ans) { 
+                    const blank = document.getElementById('b-v');
+                    if(blank) { 
+                        blank.textContent = c; 
+                        blank.style.color = "var(--purple)"; 
+                    }
+                    showWin(false); 
+                } else {
+                    alert("もう一度考えてみよう！");
+                }
+            };
+            choicesDiv.appendChild(b);
+        });
+        interaction.appendChild(choicesDiv);
+
+    } else if (data.type === "dropdown") {
+        let formattedQ = data.q.replace("<span class='blank'>[dropdown]</span>", `<select id="adverbSelect" class="select-box"><option value="">-- 選択 --</option>${shuffleArray(data.options).map(o => `<option value="${o}">${o}</option>`).join('')}</select>`);
+        qBox.innerHTML = `<span class="translation">${data.ja}</span>${formattedQ}`;
+
+        const ck = document.createElement('button'); 
+        ck.className = "btn"; 
+        ck.style.background = "var(--purple)"; 
+        ck.style.color = "white"; 
+        ck.style.fontWeight = "bold";
+        ck.style.marginTop = "15px";
+        ck.textContent = "Check Answer";
+        ck.onclick = () => { 
+            const sel = document.getElementById('adverbSelect');
+            if (sel && sel.value === data.ans) {
+                showWin(false);
+            } else {
+                alert("正しい副詞を選べているか確認してみよう！");
+            }
+        };
+        interaction.appendChild(ck);
+
+    } else if (data.type === "sort") {
+        qBox.innerHTML = `<span class="translation">${data.ja}</span><div class="answer-area" id="az"></div>`;
+        const bank = document.createElement('div');
+        
+        shuffleArray(data.words).forEach(w => {
+            const b = document.createElement('button'); 
+            b.className = "word-btn"; 
+            b.textContent = w;
+            b.onclick = () => { 
+                b.classList.add('used'); 
+                userSort.push({text: w, btn: b}); 
+                renderSort(); 
+            };
+            bank.appendChild(b);
+        });
+        interaction.appendChild(bank);
+
+        const ck = document.createElement('button'); 
+        ck.className = "btn"; 
+        ck.style.background = "var(--purple)"; 
+        ck.style.color = "white"; 
+        ck.style.fontWeight = "bold";
+        ck.style.marginTop = "15px";
+        ck.textContent = "Check Answer";
+        ck.onclick = () => { 
+            const userText = userSort.map(i => i.text).join(" ")
+                .replace(/ ,/g, ",")
+                .replace(/ \./g, ".")
+                .replace(/ %/g, "%");
+            if(userText === data.full) {
+                showWin(true); 
+            } else {
+                alert("語順を確認してみよう！"); 
+            }
+        };
+        interaction.appendChild(ck);
+    }
+}
+
+function renderSort() {
+    const zone = document.getElementById('az'); 
+    if(!zone) return;
+    zone.innerHTML = "";
+    userSort.forEach((item, idx) => {
+        const s = document.createElement('span'); 
+        s.className = "word-btn"; 
+        s.textContent = item.text;
+        s.onclick = () => { 
+            item.btn.classList.remove('used'); 
+            userSort.splice(idx, 1); 
+            renderSort(); 
+        };
+        zone.appendChild(s);
+    });
+}
+
+function showWin(isSort = false) {
+    confetti({ particleCount: 90, spread: 60, origin: { y: 0.6 } });
+    const data = filteredQuiz[currentIdx];
+    
+    if(isSort) {
+        const az = document.getElementById('az');
+        if(az) az.innerHTML = `<div class="pop-sentence">${data.full}</div>`;
+        document.getElementById('interactionArea').innerHTML = "";
+    } else {
+        document.getElementById('interactionArea').style.display = 'none';
+    }
+
+    const expBox = document.getElementById('explanation');
+    expBox.innerHTML = `<strong>解説:</strong> ${data.exp}`;
+    expBox.style.display = "block";
+    
+    document.getElementById('speakerBtn').style.display = "block";
+    document.getElementById('nextBtn').style.display = "block";
+}
+
+function speakText() {
+    const data = filteredQuiz[currentIdx];
+    let textToSpeak = data.full || data.q.replace(/<[^>]+>/g, '').replace('&nbsp;', '');
+    const uttr = new SpeechSynthesisUtterance(textToSpeak);
+    uttr.lang = "en-US";
+    speechSynthesis.speak(uttr);
+}
+
+function nextQuestion() {
+    currentIdx++;
+    if (currentIdx < filteredQuiz.length) {
+        loadQuestion();
+    } else {
+        if(currentPart < 4) {
+            alert(`Part ${currentPart} クリア！次の Part へ進みます。`);
+            changePart(currentPart + 1);
+        } else {
+            alert("おめでとうございます！すべての問題をクリアしました！");
+        }
+    }
+}
+
+function shuffleArray(array) {
+    let result = [...array];
+    for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
+}
+
+window.onload = () => {
+    const ws = document.getElementById('ws-content');
+    let partTitles = {
+        1: "Part 1: 数量の強調 (as many as / as few as / as much as / as little as)",
+        2: "Part 2: 可能な限り / 同等の表現 (as ... as possible / as ... as 人 can / just as ... as)",
+        3: "Part 3: 比較の重要慣用表現 (not so much A as B / no more than / no less than / at best / at least)",
+        4: "Part 4: 様々な比較の文 (the second highest / no longer / not so foolish as to ...)"
+    };
+
+    let currentPrintPart = 0;
+
+    quizData.forEach((q, i) => {
+        if(q.part !== currentPrintPart) {
+            currentPrintPart = q.part;
+            const pHeader = document.createElement('div');
+            pHeader.className = 'print-part-header';
+            pHeader.textContent = partTitles[currentPrintPart];
+            ws.appendChild(pHeader);
+
+            if (currentPrintPart === 2) {
+                const hint = document.createElement('div');
+                hint.className = 'word-bank';
+                hint.innerHTML = "<b>[ 副詞の選択肢 ]</b> bad / comfortable / fast / hard / long / often / quietly / well / soon";
+                ws.appendChild(hint);
+            }
+        }
+
+        const div = document.createElement('div'); 
+        div.className = 'print-q';
+        
+        let line = "";
+        if (q.type === "choice") {
+            line = q.q.replace(/<span class='blank'.*?<\/span>/, "( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )");
+        } else if (q.type === "dropdown") {
+            line = q.q.replace("<span class='blank'>[dropdown]</span>", "as ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) as");
+        } else {
+            line = "____________________________________________________________";
+        }
+        
+        let choicesHtml = "";
+        if(q.choices) {
+            choicesHtml = "<div class='print-choices'>" + shuffleArray(q.choices).map((c, idx) => `<span class='choice-item'>(${idx+1}) ${c}</span>`).join("") + "</div>";
+        } else if(q.words) {
+            choicesHtml = `<div class='print-en' style='font-size:10pt; color:#444;'>[ ${shuffleArray(q.words).join(" / ")} ]</div>`;
+        }
+        
+        div.innerHTML = `<div class='print-ja'>${i+1}. ${q.ja}</div><div class='print-en'>${line}</div>${choicesHtml}`;
+        ws.appendChild(div);
+    });
+    
+    loadQuestion();
+};
+</script>
+</body>
+</html>
