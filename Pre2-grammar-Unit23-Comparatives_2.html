@@ -926,7 +926,23 @@ function showWin(isSort = false) {
 
 function speakText() {
     const data = filteredQuiz[currentIdx];
-    let textToSpeak = data.full || data.correctText || data.q.replace(/<[^>]+>/g, '').replace('&nbsp;', '');
+    let textToSpeak = "";
+
+    if (data.full) {
+        // 並べ替え問題（sort）
+        textToSpeak = data.full;
+    } else if (data.correctText) {
+        // 間違い探し問題（error_check）
+        textToSpeak = data.correctText;
+    } else if (data.q) {
+        // 選択肢問題（choice, dropdown）
+        // 空欄タグ部分を正解の単語(ans)に置換して完全な英文を作成
+        textToSpeak = data.q
+            .replace(/<span class='blank'.*?<\/span>/g, data.ans)
+            .replace(/<[^>]+>/g, '')
+            .replace(/&nbsp;/g, ' ');
+    }
+
     const uttr = new SpeechSynthesisUtterance(textToSpeak);
     uttr.lang = "en-US";
     speechSynthesis.speak(uttr);
