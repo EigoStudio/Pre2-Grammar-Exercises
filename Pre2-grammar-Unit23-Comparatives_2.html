@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>23章 比較② - 英検準2級レベル問題集</title>
-    <script src="auth.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Andika&family=Kosugi+Maru&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
@@ -417,17 +416,18 @@ const quizData = [
     },
     {
         part: 3, type: "sort",
-        ja: "ユリコは歌手というよりむしろダンサーだ。",
-        words: ["Yuriko", "is", "not", "so", "much", "a", "singer", "as", "a", "dancer", "."],
-        full: "Yuriko is not so much a singer as a dancer.",
-        exp: "not so much A as B の定番語順です（A・Bともに名詞）。"
+        ja: "私の双子の姉（妹）は、普通のきょうだいというよりむしろ心の友（ソウルメイト）だ。",
+        words: ["My", "twin", "sister", "is", "a", "soulmate", "rather", "than", "a", "regular", "sibling", "."],
+        full: "My twin sister is a soulmate rather than a regular sibling.",
+        exp: "B rather than A（AというよりむしろB）の並べ替え問題です。a regular sibling（普通のきょうだい）ではなく a soulmate（ソウルメイト）だという対比になっています。"
     },
     {
         part: 3, type: "sort",
-        ja: "私は人形というよりむしろパソコンが欲しい。",
-        words: ["I", "want", "a", "computer", "rather", "than", "a", "doll", "."],
-        full: "I want a computer rather than a doll.",
-        exp: "B rather than A の並べ替えです（A・Bともに名詞）。"
+        ja: "The boy's dance skills were not improving. 先生は、それは能力不足というよりむしろ無気力さ（意欲のなさ）だと指摘した。",
+        q: "The boy's dance skills were not improving.",
+        words: ["The", "teacher", "pointed", "out", "that", "it", "was", "not", "so", "much", "incompetence", "as", "apathy", "."],
+        full: "The teacher pointed out that it was not so much incompetence as apathy.",
+        exp: "not so much A as B（AというよりむしろB）の構文です。incompetence（能力不足）ではなく apathy（無気力・関心のなさ）が原因だと対比させています。"
     },
 
     // PART 4: no more than / no less than (二択プルダウン4問, 並べ替え2問)
@@ -442,8 +442,8 @@ const quizData = [
         part: 4, type: "dropdown",
         ja: "大人気のイベントだったので、なんと200人もの生徒が参加した。",
         q: "It was a very popular event, so there were <span class='blank'>[dropdown]</span> 200 students there.",
-        options: ["no less than", "no more than"], ans: "no less than",
-        exp: "「〜も（多さの驚き）」は no less than (= as many as) を用います。"
+        options: ["no fewer than", "no more than"], ans: "no fewer than",
+        exp: "「〜も（多さの驚き）」は no fewer than (= as many as) を用います。"
     },
     {
         part: 4, type: "dropdown",
@@ -469,9 +469,9 @@ const quizData = [
     {
         part: 4, type: "sort",
         ja: "会場にはなんと1,000人ものファンが集まった！",
-        words: ["No", "less", "than", "1,000", "fans", "gathered", "at", "the", "hall", "."],
-        full: "No less than 1,000 fans gathered at the hall.",
-        exp: "No less than 1,000 で「1,000人もの」という強め表現になります。"
+        words: ["No", "fewer", "than", "1,000", "fans", "gathered", "at", "the", "hall", "."],
+        full: "No fewer than 1,000 fans gathered at the hall.",
+        exp: "No fewer than 1,000 で「1,000人もの」という強め表現になります。"
     },
 
     // PART 5: at best / at least (二択プルダウン4問, 並べ替え2問)
@@ -549,10 +549,10 @@ const quizData = [
     },
     {
         part: 6, type: "sort",
-        ja: "彼女はひらがなすら読めない。ましてや漢字なんてなおさらだ。",
-        words: ["She", "cannot", "read", "Hiragana", ",", "much", "less", "Kanji", "."],
-        full: "She cannot read Hiragana, much less Kanji.",
-        exp: ", much less + 名詞 で「ましてや〜ない」の語順です。"
+        ja: "成功したその女性はプール付きの家を買う余裕がある。高級車ならなおさらだ。",
+        words: ["The", "successful", "woman", "can", "afford", "a", "house", "with", "a", "pool", ",", "much", "more", "a", "luxury", "car", "."],
+        full: "The successful woman can afford a house with a pool, much more a luxury car.",
+        exp: "肯定文に続けて , much more + 名詞（〜ならなおさらだ）を使う構文です。「プール付きの家を買えるのだから、高級車ならなおさら買える」という文脈を作っています。"
     },
     {
         part: 6, type: "sort",
